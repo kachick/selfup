@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/update-nixpkgs.yml'
+      - '**.go'
+      - 'flake.*'
   schedule:
     # Every 10:17 JST
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule

@@ -52,15 +52,21 @@ func Update(path string, prefix string, isListMode bool, skipBy string) (string,
 			return "", false, xerrors.Errorf("%s:%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", path, lineNumber, tail, err)
 		}
 		re := regexp.MustCompile(definition.Regex)
-		if isListMode {
-			fmt.Printf("%s:%d: %s\n", path, lineNumber, re.FindString(head))
-			continue
-		}
 		out, err := exec.Command("bash", "-c", definition.Script).Output()
 		if err != nil {
 			return "", false, xerrors.Errorf("%s:%d: Executing %s with bash has been failed: %w", path, lineNumber, definition.Script, err)
 		}
-		replaced := re.ReplaceAllString(head, strings.TrimSuffix(string(out), "\n"))
+		replacer := strings.TrimSuffix(string(out), "\n")
+		if isListMode {
+			extracted := re.FindString(head)
+			estimation := "KEEP"
+			if extracted != replacer {
+				estimation = "UPDATE"
+			}
+			fmt.Printf("%s:%d: %s => %s # %s\n", path, lineNumber, extracted, replacer, estimation)
+			continue
+		}
+		replaced := re.ReplaceAllString(head, replacer)
 		if !isChanged {
 			isChanged = replaced != head
 		}
