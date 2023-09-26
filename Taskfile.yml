@@ -17,6 +17,9 @@ tasks:
   build:
     cmds:
       - go build -o ./dist/selfup ./cmd/selfup
+  run:
+    cmds:
+      - go run ./cmd/selfup {{.CLI_ARGS}}
   test:
     cmds:
       - go test ./...

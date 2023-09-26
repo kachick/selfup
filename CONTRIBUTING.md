@@ -10,10 +10,6 @@
 > nix develop
 (prepared shell)
 
-> task fmt
-task: [fmt] dprint fmt
-task: [fmt] go fmt
-
 > task
 task: [build] ..."
 task: [test] go test
@@ -22,6 +18,6 @@ task: [lint] go vet
 PASS
 ok      selfup    0.313s
 
-> ./dist/selfup --version
-selfup 0.1.1-next (906924b) # 2023-06-19T09:33:14Z
+> task run -- --version
+selfup dev (rev)
 ```
