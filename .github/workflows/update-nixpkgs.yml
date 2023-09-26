@@ -19,8 +19,7 @@ jobs:
     env:
       PR_BRANCH: update-nixpkgs-${{ github.run_id }}
     steps:
-      - uses: actions/checkout@v4
-      # To trigger CIs
+      # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
         if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
         id: publish-token
@@ -28,6 +27,10 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
+          token: ${{ steps.publish-token.outputs.token }}
       - uses: DeterminateSystems/nix-installer-action@v4
       - uses: DeterminateSystems/magic-nix-cache-action@v2
       - name: Prepare Git
