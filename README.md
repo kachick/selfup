@@ -10,7 +10,7 @@ Replace strings if the line contains the definition of how to update itself.
 In [Nix](https://nixos.org/), you can skip installation steps
 
 ```console
-> nix run github:kachick/selfup/v0.0.1 -- --version
+> nix run github:kachick/selfup/v0.0.2 -- --version
 selfup dev (rev)
 ```
 
@@ -18,9 +18,9 @@ Prebuilt binaries are available for download from [releases](https://github.com/
 
 ```console
 > install_path="$(mktemp -d)"
-> curl -L https://github.com/kachick/selfup/releases/download/v0.0.1/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
+> curl -L https://github.com/kachick/selfup/releases/download/v0.0.2/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
 > "${install_path}/selfup" --version
-selfup 0.0.1 (31bd2d3)
+selfup 0.0.2 (31bd2d3)
 ```
 
 ## Usage
@@ -33,10 +33,20 @@ Assume some GitHub actions workflow have lines like follows
     dprint-version: '0.40.2' # selfup { "regex": "\\d[^']+", "script": "dprint --version | cut -d ' ' -f 2" }
 ```
 
-Then we can call this tool as follows
+Then you can call selfup as this
 
 ```bash
-selfup --prefix='# selfup ' .github/workflows/*.yml
+selfup run --prefix='# selfup ' .github/workflows/*.yml
+```
+
+You can check the running plans with `list` subcommand
+
+```console
+> selfup list --prefix='# selfup ' .github/workflows/*.yml
+.github/workflows/lint.yml:17: 0.40.2 => 0.40.2 # KEEP
+.github/workflows/lint.yml:24: 1.16.12 => 1.16.12 # KEEP
+.github/workflows/release.yml:37: 1.20.0 => 999 # UPDATE
+.github/workflows/ci-go.yml:48: 2023.1.6 => 2023.1.6 # KEEP
 ```
 
 ### JSON schema
@@ -47,16 +57,6 @@ selfup --prefix='# selfup ' .github/workflows/*.yml
 | script | Bash script                                                                               |
 
 ### Options
-
-`--list-targets` option prints extracted targets without side-effect
-
-```console
-> selfup --list-targets --prefix='# selfup ' .github/workflows/*.yml
-.github/workflows/ci-go.yml:48: 2023.1.6
-.github/workflows/lint.yml:17: 0.40.2
-.github/workflows/lint.yml:24: 1.16.11
-.github/workflows/release.yml:37: 1.20.0
-```
 
 `--skip-by` option skips to parse JSON and runs if the line includes this string
 
