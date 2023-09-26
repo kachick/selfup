@@ -67,7 +67,7 @@ $ selfup --prefix='# selfup ' --list-targets .github/workflows/*.yml
 			}
 
 			if isDirty {
-				err := os.WriteFile(path, []byte(newBody), os.ModePerm)
+				err := os.WriteFile(path, []byte(newBody+"\n"), os.ModePerm)
 				if err != nil {
 					log.Fatalf("%+v", xerrors.Errorf("%s: %w", path, err))
 				}
