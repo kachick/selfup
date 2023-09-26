@@ -13,6 +13,8 @@ jobs:
   tasks:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      PR_BRANCH: update-nixpkgs-${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v4
@@ -21,15 +23,10 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - run: nix develop --command task update
-      - name: Push
-        if: github.event_name != 'pull_request'
-        env:
-          PR_BRANCH: update-nixpkgs-${{ github.run_id }}
-        run: |
           git switch -c "${PR_BRANCH}"
-          git commit -m 'Update CI dependencies' .github
-          git push origin "${PR_BRANCH}"
+      - run: nix develop --command task update
+      - run: git push origin "${PR_BRANCH}"
+        if: github.event_name != 'pull_request'
       # To trigger CIs
       - name: Generate GitHub Apps token
         if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
