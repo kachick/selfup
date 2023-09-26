@@ -22,11 +22,13 @@ var (
 func main() {
 	prefixFlag := flag.String("prefix", "", "prefix to write json")
 	listFlag := flag.Bool("list-targets", false, "print target lines without actual replacing")
+	skipByFlag := flag.String("skip-by", "", "skip to run if the line contains this string")
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
 	const usage = `Usage: selfup [OPTIONS] [PATH]...
 
 $ selfup --prefix='# selfup ' .github/workflows/*.yml
+$ selfup --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
 $ selfup --prefix='# selfup ' --list-targets .github/workflows/*.yml
 `
 
@@ -50,6 +52,7 @@ $ selfup --prefix='# selfup ' --list-targets .github/workflows/*.yml
 
 	prefix := *prefixFlag
 	isListMode := *listFlag
+	skipBy := *skipByFlag
 
 	if prefix == "" {
 		flag.Usage()
@@ -61,7 +64,7 @@ $ selfup --prefix='# selfup ' --list-targets .github/workflows/*.yml
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			newBody, isDirty, err := updater.Update(path, prefix, isListMode)
+			newBody, isDirty, err := updater.Update(path, prefix, isListMode, skipBy)
 			if err != nil {
 				log.Fatalf("%+v", err)
 			}

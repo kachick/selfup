@@ -20,6 +20,14 @@ tasks:
   run:
     cmds:
       - go run ./cmd/selfup {{.CLI_ARGS}}
+  list:
+    cmds:
+      - go run ./cmd/selfup --prefix='# selfup ' --list-targets --skip-by='nix run' .github/workflows/*.yml
+  update:
+    cmds:
+      - nix flake update --commit-lock-file
+      - nix develop --command go run ./cmd/selfup --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
+      - git commit -m 'Update CI dependencies with sync to nixpkgs' .github
   test:
     cmds:
       - go test ./...
