@@ -1,5 +1,8 @@
 name: CI - Update nixpkgs and sync CI dependencies
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/update-nixpkgs.yml'
   schedule:
     # Every 10:17 JST
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -17,6 +20,7 @@ jobs:
       - run: nix flake update --commit-lock-file
       - run: nix develop --command task run -- --prefix='# selfup ' .github/workflows/*.yml
       - name: Push
+        if: github.event_name != 'pull_request'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -25,12 +29,14 @@ jobs:
           git push origin "${BRANCH}"
       # To trigger CIs
       - name: Generate GitHub Apps token
+        if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
         id: publish-token
         uses: tibdex/github-app-token@v2
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
       - name: Create PR
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
