@@ -25,6 +25,7 @@ jobs:
         id: publish-token
         uses: tibdex/github-app-token@v2
         with:
+          # Required to set workflow permission for the APP
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.PRIVATE_KEY }}
       - uses: actions/checkout@v4
@@ -47,4 +48,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
-          gh pr create --base 'main' --title 'Update nixpkgs' --body 'This PR is based on https://github.com/kachick/selfup'
+          gh pr create --base 'main' --title 'Update nixpkgs and related CI dependencies' --body 'This PR is based on https://github.com/kachick/selfup'

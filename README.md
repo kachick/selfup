@@ -64,3 +64,5 @@ Especially I want to synchronize them with Nix shells.
 
 Nix and the ecosystem provide useful CIs, but the runtime footprint is not small even for small changes.\
 So I'm currently using both Nix CI and some tools CIs.
+
+You can check actual example at [workflow file](.github/workflows/update-nixpkgs.yml), and the [result PR](https://github.com/kachick/selfup/pull/3).
