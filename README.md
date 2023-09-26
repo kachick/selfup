@@ -61,10 +61,10 @@ You can check the running plans with `list` subcommand
 `--skip-by` option skips to parse JSON and runs if the line includes this string
 
 ```console
-> selfup --prefix='# selfup ' --list-targets --skip-by=dprint .github/workflows/*.yml
-.github/workflows/ci-go.yml:48: 2023.1.6
-.github/workflows/lint.yml:24: 1.16.11
-.github/workflows/release.yml:37: 1.20.0
+> selfup list --prefix='# selfup ' --skip-by=dprint .github/workflows/*.yml
+.github/workflows/lint.yml:24: 1.16.12 => 1.16.12 # KEEP
+.github/workflows/release.yml:37: 1.20.0 => 999 # UPDATE
+.github/workflows/ci-go.yml:48: 2023.1.6 => 2023.1.6 # KEEP
 ```
 
 ## Motivation
