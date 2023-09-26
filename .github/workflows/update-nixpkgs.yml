@@ -9,6 +9,9 @@ on:
     - cron: '17 1 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   tasks:
     runs-on: ubuntu-latest
