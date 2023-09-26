@@ -20,7 +20,7 @@ Prebuilt binaries are available for download from [releases](https://github.com/
 > install_path="$(mktemp -d)"
 > curl -L https://github.com/kachick/selfup/releases/download/v0.0.2/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
 > "${install_path}/selfup" --version
-selfup 0.0.2 (31bd2d3)
+selfup 0.0.2 (REV)
 ```
 
 ## Usage
