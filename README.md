@@ -36,7 +36,7 @@ selfup --prefix='# selfup ' .github/workflows/*.yml
 | regex  | [RE2](https://github.com/google/re2/wiki/Syntax), be careful to escape for JSON stringify |
 | script | Bash script                                                                               |
 
-### Mode
+### Options
 
 `--list-targets` option prints extracted targets without side-effect
 
@@ -44,6 +44,15 @@ selfup --prefix='# selfup ' .github/workflows/*.yml
 > selfup --list-targets --prefix='# selfup ' .github/workflows/*.yml
 .github/workflows/ci-go.yml:48: 2023.1.6
 .github/workflows/lint.yml:17: 0.40.2
+.github/workflows/lint.yml:24: 1.16.11
+.github/workflows/release.yml:37: 1.20.0
+```
+
+`--skip-by` option skips to parse JSON and runs if the line includes this string
+
+```console
+> selfup --prefix='# selfup ' --list-targets --skip-by=dprint .github/workflows/*.yml
+.github/workflows/ci-go.yml:48: 2023.1.6
 .github/workflows/lint.yml:24: 1.16.11
 .github/workflows/release.yml:37: 1.20.0
 ```

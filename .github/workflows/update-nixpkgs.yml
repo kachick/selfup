@@ -21,8 +21,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - run: nix flake update --commit-lock-file
-      - run: nix run . -- --prefix='# selfup ' .github/workflows/*.yml
+      - run: nix develop --command task update
       - name: Push
         if: github.event_name != 'pull_request'
         run: |
