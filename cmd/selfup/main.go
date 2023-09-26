@@ -62,7 +62,6 @@ $ selfup --prefix='# selfup ' --list-targets .github/workflows/*.yml
 		go func(path string) {
 			defer wg.Done()
 			newBody, isDirty, err := updater.Update(path, prefix, isListMode)
-
 			if err != nil {
 				log.Fatalf("%+v", err)
 			}
