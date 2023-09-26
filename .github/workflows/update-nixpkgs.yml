@@ -20,6 +20,14 @@ jobs:
       PR_BRANCH: update-nixpkgs-${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
+      # To trigger CIs
+      - name: Generate GitHub Apps token
+        if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
+        id: publish-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
       - uses: DeterminateSystems/nix-installer-action@v4
       - uses: DeterminateSystems/magic-nix-cache-action@v2
       - name: Prepare Git
@@ -30,14 +38,8 @@ jobs:
       - run: nix develop --command task update
       - run: git push origin "${PR_BRANCH}"
         if: github.event_name != 'pull_request'
-      # To trigger CIs
-      - name: Generate GitHub Apps token
-        if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
-        id: publish-token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
       - name: Create PR
         if: github.event_name != 'pull_request'
         env:
