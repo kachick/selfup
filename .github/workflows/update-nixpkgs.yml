@@ -29,6 +29,7 @@ jobs:
           private_key: ${{ secrets.PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
+          # Needed to specify token for checkout phase, only in pushing phase is too late
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
           token: ${{ steps.publish-token.outputs.token }}
       - uses: DeterminateSystems/nix-installer-action@v4
@@ -41,11 +42,9 @@ jobs:
       - run: nix develop --command task update
       - run: git push origin "${PR_BRANCH}"
         if: github.event_name != 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
       - name: Create PR
         if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
-          gh pr create --base "main" --title "Update nixpkgs and sync CI dependencies"
+          gh pr create --base 'main' --title 'Update nixpkgs' --body 'This PR is based on https://github.com/kachick/selfup'
