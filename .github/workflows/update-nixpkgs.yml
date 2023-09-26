@@ -1,0 +1,37 @@
+name: CI - Update nixpkgs and sync CI dependencies
+on:
+  schedule:
+    # Every 10:17 JST
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  tasks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v4
+      - uses: DeterminateSystems/magic-nix-cache-action@v2
+      - run: nix flake update --commit-lock-file
+      - run: nix develop --command task run -- --prefix='# selfup ' .github/workflows/*.yml
+      - name: Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${BRANCH}"
+          git commit -m 'Update CI dependencies' .github
+          git push origin "${BRANCH}"
+      # To trigger CIs
+      - name: Generate GitHub Apps token
+        id: publish-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+      - name: Create PR
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+        run: |
+          gh pr create --base "main" --title "Update nixpkgs and sync CI dependencies"
