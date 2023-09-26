@@ -24,10 +24,12 @@ jobs:
       - run: nix develop --command task update
       - name: Push
         if: github.event_name != 'pull_request'
+        env:
+          PR_BRANCH: update-nixpkgs-${{ github.run_id }}
         run: |
-          git switch -c "${BRANCH}"
+          git switch -c "${PR_BRANCH}"
           git commit -m 'Update CI dependencies' .github
-          git push origin "${BRANCH}"
+          git push origin "${PR_BRANCH}"
       # To trigger CIs
       - name: Generate GitHub Apps token
         if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
