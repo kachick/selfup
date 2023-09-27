@@ -52,9 +52,9 @@ jobs:
           count="$(git rev-list --count main..)"
           echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
       - run: git push origin "${PR_BRANCH}"
-        if: (github.event_name != 'pull_request') && (${{ steps.count-commits.outputs.count }} > 0)
+        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
       - name: Create PR
-        if: (github.event_name != 'pull_request') && (${{ steps.count-commits.outputs.count }} > 0)
+        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
