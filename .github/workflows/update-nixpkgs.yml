@@ -46,10 +46,15 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "${PR_BRANCH}"
       - run: nix develop --command task update
+      - name: Count added commits
+        id: count-commits
+        run: |
+          count="$(git rev-list --count main..)"
+          echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
       - run: git push origin "${PR_BRANCH}"
-        if: github.event_name != 'pull_request'
+        if: (github.event_name != 'pull_request') && (${{ steps.count-commits.outputs.count }} > 0)
       - name: Create PR
-        if: github.event_name != 'pull_request'
+        if: (github.event_name != 'pull_request') && (${{ steps.count-commits.outputs.count }} > 0)
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
