@@ -51,10 +51,10 @@ You can check the running plans with `list` subcommand
 
 ### JSON schema
 
-| Field  | Description                                                                               |
-| ------ | ----------------------------------------------------------------------------------------- |
-| regex  | [RE2](https://github.com/google/re2/wiki/Syntax), be careful to escape for JSON stringify |
-| script | Bash script                                                                               |
+| Field  | Description                                                                                  |
+| ------ | -------------------------------------------------------------------------------------------- |
+| regex  | [RE2](https://github.com/google/re2/wiki/Syntax), remember to escape meta characters in JSON |
+| script | Bash script to get new string                                                                |
 
 ### Options
 
