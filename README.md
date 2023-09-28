@@ -75,4 +75,4 @@ Especially I want to synchronize them with Nix shells.
 Nix and the ecosystem provide useful CIs, but the runtime footprint is not small even for small changes.\
 So I'm currently using both Nix CI and some tools CIs.
 
-You can check actual example at [workflow file](.github/workflows/update-nixpkgs.yml), and the [result PR](https://github.com/kachick/selfup/pull/3).
+You can check actual example at [workflow file](https://github.com/kachick/anylang-template/blob/0d50545d31a5b7b878d2738db38654c23cd37ef4/.github/workflows/reusable-update-nixpkgs-and-versions-in-ci.yml#L68), and the [result PR](https://github.com/kachick/anylang-template/pull/24).
