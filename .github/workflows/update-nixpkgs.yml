@@ -40,6 +40,10 @@ jobs:
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
           token: ${{ steps.publish-token.outputs.token }}
       - uses: actions/checkout@v4
+        with:
+          # Needed to get commit counts
+          # https://stackoverflow.com/a/65056108
+          fetch-depth: 0
         if: (github.event.sender.login != 'kachick') && (github.event_name == 'pull_request')
       - uses: DeterminateSystems/nix-installer-action@v4
       - uses: DeterminateSystems/magic-nix-cache-action@v2
