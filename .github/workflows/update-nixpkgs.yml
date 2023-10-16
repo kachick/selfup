@@ -45,7 +45,7 @@ jobs:
           # https://stackoverflow.com/a/65056108
           fetch-depth: 0
         if: (github.event.sender.login != 'kachick') && (github.event_name == 'pull_request')
-      - uses: DeterminateSystems/nix-installer-action@v5
+      - uses: DeterminateSystems/nix-installer-action@v6
       - uses: DeterminateSystems/magic-nix-cache-action@v2
       - name: Prepare Git
         run: |
