@@ -1,0 +1,24 @@
+name: Bump flake.lock and related dependencies
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bump-flake-lock-and-selfup.yml'
+      - '.github/workflows/reusable-bump-flake-lock-and-selfup.yml'
+  schedule:
+    # Every 10:17 JST
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    # Why splitting to another file?: https://github.com/actions/runner/issues/2274
+    uses: ./.github/workflows/reusable-bump-flake-lock-and-selfup.yml
+    if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
+    with:
+      dry-run: ${{ github.event_name == 'pull_request' }}
+      optional-run: |
+        echo 'Add another changes and git commit here, especially for .node-version/.ruby-version'
+    secrets:
+      APP_ID: ${{ secrets.APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
