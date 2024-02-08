@@ -43,7 +43,6 @@ jobs:
     steps:
       # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
-        if: (! inputs.dry-run)
         id: publish-token
         uses: tibdex/github-app-token@v2
         with:
@@ -51,13 +50,6 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
-        if: inputs.dry-run
-        with:
-          # Needed to get commit counts
-          # https://stackoverflow.com/a/65056108
-          fetch-depth: 0
-      - uses: actions/checkout@v4
-        if: (! inputs.dry-run)
         with:
           # Needed to get commit counts
           # https://stackoverflow.com/a/65056108
