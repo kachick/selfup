@@ -12,7 +12,7 @@ on:
 
 jobs:
   bump:
-    # Why splitting to another file?: https://github.com/actions/runner/issues/2274
+    # Why split to another file: https://github.com/actions/runner/issues/2274
     uses: ./.github/workflows/reusable-bump-flake-lock-and-selfup.yml
     if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
     with:
