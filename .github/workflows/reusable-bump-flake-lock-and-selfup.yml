@@ -19,6 +19,8 @@ on:
       pr-body:
         default: |
           This PR has been created by https://github.com/kachick/selfup/blob/action-v1/.github/workflows/reusable-bump-flake-lock-and-selfup.yml
+
+          Do NOT update the branch of this PR, it may be updated by the bot with force push.
         required: false
         type: string
       selfup-commit-message:
