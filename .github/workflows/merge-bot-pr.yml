@@ -57,6 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'kachick-dependency-updater[bot]' }}
     steps:
+      - name: Dump context to debug
+        run: echo '${{ github.actor }}'
       - name: Wait other jobs
         uses: kachick/wait-other-jobs@v2.0.2
         timeout-minutes: 20
