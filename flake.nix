@@ -25,7 +25,7 @@
               # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
               bashInteractive
 
-              go_1_21
+              go_1_22
               nil
               nixpkgs-fmt
               dprint
