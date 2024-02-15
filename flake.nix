@@ -43,7 +43,7 @@
           src = pkgs.lib.cleanSource self;
 
           # When updating go.mod or go.sum, update this sha together
-          vendorSha256 = "sha256-ot3JjQ49kLVG+l1EyLaxonDfgxTyFTmli3B8YDIjhyY=";
+          vendorHash = "sha256-ot3JjQ49kLVG+l1EyLaxonDfgxTyFTmli3B8YDIjhyY=";
         };
 
         packages.default = packages.selfup;
