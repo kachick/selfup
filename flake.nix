@@ -36,12 +36,14 @@
             ];
           };
 
-        packages.selfup = pkgs.buildGo121Module {
+        packages.selfup = pkgs.buildGo122Module {
           pname = "selfup";
           version = updaterVersion;
           src = pkgs.lib.cleanSource self;
 
-          # When updating go.mod or go.sum, update this sha together
+          # When updating go.mod or go.sum, update this sha together as following
+          # vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          # `pkgs.lib.fakeSha256` returns invalid string in thesedays... :<;
           vendorHash = "sha256-ot3JjQ49kLVG+l1EyLaxonDfgxTyFTmli3B8YDIjhyY=";
         };
 
