@@ -25,7 +25,7 @@
               # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
               bashInteractive
 
-              go_1_21
+              go_1_22
               nil
               nixpkgs-fmt
               dprint
@@ -33,17 +33,18 @@
               go-task
               goreleaser
               typos
-              go-tools
             ];
           };
 
-        packages.selfup = pkgs.buildGo121Module {
+        packages.selfup = pkgs.buildGo122Module {
           pname = "selfup";
           version = updaterVersion;
           src = pkgs.lib.cleanSource self;
 
-          # When updating go.mod or go.sum, update this sha together
-          vendorSha256 = "sha256-ot3JjQ49kLVG+l1EyLaxonDfgxTyFTmli3B8YDIjhyY=";
+          # When updating go.mod or go.sum, update this sha together as following
+          # vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          # `pkgs.lib.fakeSha256` returns invalid string in thesedays... :<;
+          vendorHash = "sha256-ot3JjQ49kLVG+l1EyLaxonDfgxTyFTmli3B8YDIjhyY=";
         };
 
         packages.default = packages.selfup;

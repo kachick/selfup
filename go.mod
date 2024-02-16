@@ -1,8 +1,6 @@
 module github.com/kachick/selfup
 
-go 1.21
-
-toolchain go1.21.1
+go 1.22.0
 
 require (
 	github.com/huandu/xstrings v1.4.0
