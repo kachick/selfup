@@ -33,7 +33,6 @@
               go-task
               goreleaser
               typos
-              go-tools
             ];
           };
 
