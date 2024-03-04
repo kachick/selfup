@@ -46,12 +46,12 @@ jobs:
       # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
         id: publish-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
         with:
           # Required to set workflow permission for the APP
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           # Needed to get commit counts
           # https://stackoverflow.com/a/65056108
@@ -59,8 +59,8 @@ jobs:
           # Needed to specify token for checkout phase, only in pushing phase is too late
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
           token: ${{ steps.publish-token.outputs.token }}
-      - uses: DeterminateSystems/nix-installer-action@v9
-      - uses: DeterminateSystems/magic-nix-cache-action@v3
+      - uses: DeterminateSystems/nix-installer-action@cd46bde16ab981b0a7b2dce0574509104543276e # v9
+      - uses: DeterminateSystems/magic-nix-cache-action@eeabdb06718ac63a7021c6132129679a8e22d0c7 # v3
       - name: Fetch active PRs by me
         id: fetch-active-prs
         env:
