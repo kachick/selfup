@@ -46,7 +46,7 @@ jobs:
       # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
         id: publish-token
-        uses: actions/create-github-app-token@78e5f2ddc08efcb88fbbee6cfa3fed770ba550c3 # v1.9.1
+        uses: actions/create-github-app-token@6c406e8a244fdf6bbf79e6cc8a91504a48d2c2ce # v1.9.2
         with:
           # Required to set workflow permission for the APP
           app-id: ${{ secrets.APP_ID }}
