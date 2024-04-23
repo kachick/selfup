@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	updater "github.com/kachick/selfup/internal"
+	"golang.org/x/term"
 	"golang.org/x/xerrors"
 )
 
@@ -23,6 +24,7 @@ func main() {
 	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
 	prefixFlag := sharedFlags.String("prefix", "", "prefix to write json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
+	noColorFlag := sharedFlags.Bool("no-color", false, "disable color output")
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
@@ -70,6 +72,7 @@ $ selfup --version
 	sharedFlags.Parse(os.Args[2:])
 	prefix := *prefixFlag
 	skipBy := *skipByFlag
+	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
 
 	if prefix == "" {
 		flag.Usage()
@@ -81,7 +84,7 @@ $ selfup --version
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			newBody, isDirty, err := updater.Update(path, prefix, isListMode, skipBy)
+			newBody, isDirty, err := updater.Update(path, prefix, isListMode, skipBy, isColor)
 			if err != nil {
 				log.Fatalf("%+v", err)
 			}

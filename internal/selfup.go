@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/huandu/xstrings"
 	"golang.org/x/xerrors"
 )
@@ -19,7 +20,8 @@ type Definition struct {
 }
 
 // Returns new body and true if it is changed
-func Update(path string, prefix string, isListMode bool, skipBy string) (string, bool, error) {
+func Update(path string, prefix string, isListMode bool, skipBy string, isColor bool) (string, bool, error) {
+	green := color.New(color.FgGreen).SprintFunc()
 	newLines := []string{}
 	isChanged := false
 
@@ -59,11 +61,15 @@ func Update(path string, prefix string, isListMode bool, skipBy string) (string,
 		replacer := strings.TrimSuffix(string(out), "\n")
 		if isListMode {
 			extracted := re.FindString(head)
-			estimation := "KEEP"
+			estimation := " "
 			if extracted != replacer {
-				estimation = "UPDATE"
+				estimation = "✓"
+				if isColor {
+					replacer = green(replacer)
+					estimation = green(estimation)
+				}
 			}
-			fmt.Printf("%s:%d: %s => %s # %s\n", path, lineNumber, extracted, replacer, estimation)
+			fmt.Printf("%s %s:%d: %s => %s\n", estimation, path, lineNumber, extracted, replacer)
 			continue
 		}
 		replaced := re.ReplaceAllString(head, replacer)
