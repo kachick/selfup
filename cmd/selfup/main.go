@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	updater "github.com/kachick/selfup"
+	updater "github.com/kachick/selfup/internal"
 	"golang.org/x/xerrors"
 )
 
