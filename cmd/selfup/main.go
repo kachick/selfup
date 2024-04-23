@@ -87,7 +87,7 @@ $ selfup --version
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			result, err := updater.Update(path, prefix, isListMode, skipBy, isColor)
+			result, err := updater.Update(path, prefix, skipBy, isColor)
 			if err != nil {
 				log.Fatalf("%+v", err)
 			}

@@ -26,7 +26,7 @@ type Result struct {
 }
 
 // Returns new body and true if it is changed
-func Update(path string, prefix string, isListMode bool, skipBy string, isColor bool) (Result, error) {
+func Update(path string, prefix string, skipBy string, isColor bool) (Result, error) {
 	green := color.New(color.FgGreen).SprintFunc()
 	newLines := []string{}
 	isChanged := false
@@ -82,9 +82,6 @@ func Update(path string, prefix string, isListMode bool, skipBy string, isColor 
 		}
 		fmt.Println(fmt.Sprintf("%s %s:%d: %s", estimation, path, lineNumber, extracted) + suffix)
 
-		if isListMode {
-			continue
-		}
 		replaced := strings.Replace(head, extracted, replacer, 1)
 		if !isChanged {
 			isChanged = replaced != head
