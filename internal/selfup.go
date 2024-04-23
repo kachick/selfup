@@ -69,9 +69,17 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 		}
 		replacer := strings.TrimSuffix(string(out), "\n")
 		extracted := re.FindString(head)
+		replaced := strings.Replace(head, extracted, replacer, 1)
+		if !isChanged {
+			isChanged = replaced != head
+		}
+		extractedToEnsure := re.FindString(replaced)
+		if replacer != extractedToEnsure {
+			return Result{}, xerrors.Errorf("%s:%d: The result of updater command has malformed format: %s", path, lineNumber, replacer)
+		}
 		estimation := " "
 		suffix := ""
-		if extracted != replacer {
+		if replaced != head {
 			replacedCount += 1
 			estimation = "✓"
 			if isColor {
@@ -80,13 +88,8 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 			}
 			suffix = fmt.Sprintf(" => %s", replacer)
 		}
-		fmt.Println(fmt.Sprintf("%s %s:%d: %s", estimation, path, lineNumber, extracted) + suffix)
-
-		replaced := strings.Replace(head, extracted, replacer, 1)
-		if !isChanged {
-			isChanged = replaced != head
-		}
 		newLines = append(newLines, replaced+match+tail)
+		fmt.Println(fmt.Sprintf("%s %s:%d: %s", estimation, path, lineNumber, extracted) + suffix)
 	}
 
 	return Result{
