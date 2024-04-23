@@ -31,32 +31,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Wait other jobs
-        uses: kachick/wait-other-jobs@v2.0.3
-        timeout-minutes: 10
-      - name: Approve and merge
-        run: gh pr review --approve "$PR_URL" && gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-  # Avoid `automerge` renovate official feature.
-  #   It wait longtime to be merged.
-  # Avoid `platformAutomerge` renovate official feature.
-  #   It requires many changes in GitHub settings.
-  #    - `Allow auto-merge`
-  #    - `Require status checks to pass before merging` and specify the status names
-  #   Changing in all personal repository is annoy task for me. Even if using terrafform, getting mandatory CI names in each repo is too annoy!
-  renovate:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    if: ${{ github.actor == 'renovate[bot]' }}
-    steps:
-      - name: Wait other jobs
-        uses: kachick/wait-other-jobs@v2.0.3
-        timeout-minutes: 10
+        uses: kachick/wait-other-jobs@v3
         with:
-          retry-method: 'equal_intervals'
-          min-interval-seconds: '15'
+          skip-same-workflow: 'true'
+          skip-list: |
+            [
+              {
+                "workflowFile": "release.yml"
+              }
+            ]
+        timeout-minutes: 10
       - name: Approve and merge
         run: gh pr review --approve "$PR_URL" && gh pr merge --auto --squash "$PR_URL"
         env:
@@ -72,7 +56,15 @@ jobs:
       - name: Dump context to debug
         run: echo '${{ github.actor }}'
       - name: Wait other jobs
-        uses: kachick/wait-other-jobs@v2.0.3
+        uses: kachick/wait-other-jobs@v3
+        with:
+          skip-same-workflow: 'true'
+          skip-list: |
+            [
+              {
+                "workflowFile": "release.yml"
+              }
+            ]
         timeout-minutes: 20
       - name: Approve and merge
         run: gh pr review --approve "$PR_URL" && gh pr merge --auto --delete-branch --squash "$PR_URL"
