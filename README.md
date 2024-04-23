@@ -43,9 +43,11 @@ You can check the running plans with `list` subcommand
 
 ```console
 > selfup list --prefix='# selfup ' .github/workflows/*.yml
-  .github/workflows/lint.yml:17: 0.40.2 => 0.40.2
+  .github/workflows/lint.yml:17: 0.40.2
 ✓ .github/workflows/release.yml:37: 1.20.0 => 1.42.9
-  .github/workflows/lint.yml:24: 1.16.12 => 1.16.12
+  .github/workflows/lint.yml:24: 1.16.12
+
+1/3 items will be replaced
 ```
 
 ### JSON schema
@@ -58,13 +60,6 @@ You can check the running plans with `list` subcommand
 ### Options
 
 `--skip-by` option skips to parse JSON and runs if the line includes this string
-
-```console
-> selfup list --prefix='# selfup ' --skip-by=dprint .github/workflows/*.yml
-.github/workflows/lint.yml:24: 1.16.12 => 1.16.12 # KEEP
-.github/workflows/release.yml:37: 1.20.0 => 999 # UPDATE
-.github/workflows/ci-go.yml:48: 2023.1.6 => 2023.1.6 # KEEP
-```
 
 ## Motivation
 
