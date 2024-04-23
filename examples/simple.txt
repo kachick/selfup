@@ -1,3 +1,4 @@
 will_be_replaced: '0.39.0' # selfup { "regex": "\\d[^']+", "script": "echo 0.76.9" }
 not_be_replacedA: '0.39.0' # selfup { "regex": "\\d[^']+", "script": "echo 0.39.0" }
 not_be_replacedB: ':<' # selfup { "regex": ":[<\\)]", "script": "echo ':)'" }
+broken: ':<' # selfup { "regex": ":[<\\)]", "script": "this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file" }
