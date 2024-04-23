@@ -1,0 +1,3 @@
+will_be_replaced: '0.39.0' # selfup { "regex": "\\d[^']+", "script": "echo 0.76.9" }
+not_be_replacedA: '0.39.0' # selfup { "regex": "\\d[^']+", "script": "echo 0.39.0" }
+not_be_replacedB: ':<' # selfup { "regex": ":<", "script": "echo ':)'" }

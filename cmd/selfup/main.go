@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	updater "github.com/kachick/selfup/internal"
+	"golang.org/x/term"
 	"golang.org/x/xerrors"
 )
 
@@ -23,6 +25,7 @@ func main() {
 	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
 	prefixFlag := sharedFlags.String("prefix", "", "prefix to write json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
+	noColorFlag := sharedFlags.Bool("no-color", false, "disable color output")
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
@@ -68,8 +71,10 @@ $ selfup --version
 	}
 
 	sharedFlags.Parse(os.Args[2:])
+	paths := sharedFlags.Args()
 	prefix := *prefixFlag
 	skipBy := *skipByFlag
+	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
 
 	if prefix == "" {
 		flag.Usage()
@@ -77,17 +82,20 @@ $ selfup --version
 	}
 
 	wg := &sync.WaitGroup{}
-	for _, path := range sharedFlags.Args() {
+	results := make(chan updater.Result, len(paths))
+	for _, path := range paths {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			newBody, isDirty, err := updater.Update(path, prefix, isListMode, skipBy)
+			result, err := updater.Update(path, prefix, isListMode, skipBy, isColor)
 			if err != nil {
 				log.Fatalf("%+v", err)
 			}
+			results <- result
+			isDirty := result.Changed > 0
 
 			if isRunMode && isDirty {
-				err := os.WriteFile(path, []byte(newBody+"\n"), os.ModePerm)
+				err := os.WriteFile(path, []byte(strings.Join(result.Lines, "\n")+"\n"), os.ModePerm)
 				if err != nil {
 					log.Fatalf("%+v", xerrors.Errorf("%s: %w", path, err))
 				}
@@ -95,4 +103,17 @@ $ selfup --version
 		}(path)
 	}
 	wg.Wait()
+	close(results)
+	total := 0
+	changed := 0
+	for r := range results {
+		total += r.Total
+		changed += r.Changed
+	}
+	fmt.Println()
+	if isListMode {
+		fmt.Printf("%d/%d items will be replaced\n", changed, total)
+	} else {
+		fmt.Printf("%d/%d items have been replaced\n", changed, total)
+	}
 }
