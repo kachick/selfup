@@ -85,7 +85,7 @@ func Update(path string, prefix string, isListMode bool, skipBy string, isColor 
 		if isListMode {
 			continue
 		}
-		replaced := re.ReplaceAllString(head, replacer)
+		replaced := strings.Replace(head, extracted, replacer, 1)
 		if !isChanged {
 			isChanged = replaced != head
 		}
