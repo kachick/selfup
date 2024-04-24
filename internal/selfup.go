@@ -72,7 +72,7 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 		args := def.Command[1:]
 		out, err := exec.Command(cmd, args...).Output()
 		if err != nil {
-			return Result{}, xerrors.Errorf("%s:%d: Executing %s with bash has been failed: %w", path, lineNumber, cmd, err)
+			return Result{}, xerrors.Errorf("%s:%d: Executing %s has been failed: %w", path, lineNumber, cmd, err)
 		}
 		cmdResult := strings.TrimSuffix(string(out), "\n")
 		replacer := cmdResult
