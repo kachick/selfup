@@ -1,4 +1,4 @@
-package updater
+package runner
 
 import (
 	"bufio"
@@ -26,7 +26,7 @@ type Target struct {
 }
 
 type Result struct {
-	Lines        []string
+	NewLines     []string
 	Targets      []Target
 	ChangedCount int
 	Total        int
@@ -109,7 +109,7 @@ func DryRun(r io.Reader, prefix string, skipBy string) (Result, error) {
 	}
 
 	return Result{
-		Lines:        newLines,
+		NewLines:     newLines,
 		Targets:      targets,
 		Total:        totalCount,
 		ChangedCount: changedCount,

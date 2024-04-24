@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
-	selfup "github.com/kachick/selfup/internal"
+	"github.com/kachick/selfup/internal/runner"
 	"golang.org/x/term"
 	"golang.org/x/xerrors"
 )
@@ -24,7 +24,7 @@ var (
 
 type Result struct {
 	Path       string
-	FileResult selfup.Result
+	FileResult runner.Result
 }
 
 func main() {
@@ -97,14 +97,14 @@ $ selfup --version
 		go func(path string) {
 			defer wg.Done()
 
-			fileResult := func() selfup.Result {
+			fileResult := func() runner.Result {
 				file, err := os.Open(path)
 				if err != nil {
 					log.Fatalf("%s: %+v", path, err)
 				}
 				defer file.Close()
 
-				fr, err := selfup.DryRun(file, prefix, skipBy)
+				fr, err := runner.DryRun(file, prefix, skipBy)
 				if err != nil {
 					log.Fatalf("%s: %+v", path, err)
 				}
@@ -114,7 +114,7 @@ $ selfup --version
 			isDirty := fileResult.ChangedCount > 0
 
 			if isRunMode && isDirty {
-				err := os.WriteFile(path, []byte(strings.Join(fileResult.Lines, "\n")+"\n"), os.ModePerm)
+				err := os.WriteFile(path, []byte(strings.Join(fileResult.NewLines, "\n")+"\n"), os.ModePerm)
 				if err != nil {
 					log.Fatalf("%s: %+v", path, err)
 				}
