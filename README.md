@@ -7,10 +7,10 @@ Replace strings if the line contains the definition of how to update itself.
 
 ## Installation
 
-In [Nix](https://nixos.org/), you can skip installation steps
+In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can skip installation steps
 
 ```console
-> nix run github:kachick/selfup/v0.0.2 -- --version
+> nix run github:kachick/selfup/v1.0.0 -- --version
 selfup dev (rev)
 ```
 
@@ -18,9 +18,9 @@ Prebuilt binaries are available for download from [releases](https://github.com/
 
 ```console
 > install_path="$(mktemp -d)"
-> curl -L https://github.com/kachick/selfup/releases/download/v0.0.2/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
+> curl -L https://github.com/kachick/selfup/releases/download/v1.0.0/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
 > "${install_path}/selfup" --version
-selfup 0.0.2 (REV)
+selfup 1.0.0 (REV)
 ```
 
 ## Usage
@@ -55,8 +55,6 @@ You can check the running plans with `list` subcommand
 ```
 
 ### JSON schema
-
-Changed from v0.0.3
 
 | Field     | Type     | Description                                                                                                    |
 | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
