@@ -27,6 +27,7 @@ func main() {
 	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
 	prefixFlag := sharedFlags.String("prefix", " selfup ", "prefix to begin json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
+	checkFlag := sharedFlags.Bool("check", false, "exit as error if found changes")
 	noColorFlag := sharedFlags.Bool("no-color", false, "disable color output")
 
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
@@ -75,6 +76,7 @@ $ selfup --version
 	paths := sharedFlags.Args()
 	prefix := *prefixFlag
 	skipBy := *skipByFlag
+	isCheckMode := *checkFlag
 	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
 
 	if prefix == "" {
@@ -116,5 +118,8 @@ $ selfup --version
 		fmt.Printf("%d/%d items will be replaced\n", changed, total)
 	} else {
 		fmt.Printf("%d/%d items have been replaced\n", changed, total)
+	}
+	if isCheckMode && (changed > 0) {
+		os.Exit(1)
 	}
 }

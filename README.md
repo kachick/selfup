@@ -25,6 +25,10 @@ selfup 0.0.2 (REV)
 
 ## Usage
 
+```plaintext
+selfup [SUB] [OPTIONS] [PATH]...
+```
+
 Assume some GitHub actions workflow have lines like follows
 
 ```yaml
@@ -65,6 +69,7 @@ Changed from v0.0.3
 
 - `--prefix`: Set customized prefix to begin the JSON
 - `--skip-by`: Skips to parse JSON and runs if the line includes this string
+- `--check`: Exit with non 0 value if found changes or the plans
 - `--no-color`: Avoid to wrap colors even if executed in terminal
 - `--version`: Print the version
 
