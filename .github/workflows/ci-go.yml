@@ -26,7 +26,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
-      - run: go test ./...
+      - run: go test -v ./...
   build:
     runs-on: ubuntu-latest
     steps:
