@@ -50,11 +50,12 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 			newLines = append(newLines, line)
 			continue
 		}
-		head, tail, found := strings.Cut(line, prefix)
+		head, tail, found := strings.Cut(line, prefix+"{")
 		if !found {
 			newLines = append(newLines, line)
 			continue
 		}
+		tail = "{" + tail
 
 		def := &Definition{}
 		totalCount += 1

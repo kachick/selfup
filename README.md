@@ -36,13 +36,13 @@ Assume some GitHub actions workflow have lines like follows
 Then you can call selfup as this
 
 ```bash
-selfup run --prefix='# selfup ' .github/workflows/*.yml
+selfup run .github/workflows/*.yml
 ```
 
 You can check the running plans with `list` subcommand
 
 ```console
-> selfup list --prefix='# selfup ' .github/workflows/*.yml
+> selfup list .github/workflows/*.yml
   .github/workflows/lint.yml:17: 0.40.2
 ✓ .github/workflows/release.yml:37: 1.20.0 => 1.42.9
   .github/workflows/lint.yml:24: 1.16.12
@@ -63,8 +63,10 @@ Changed from v0.0.3
 
 ### Options
 
-- `--skip-by`: skips to parse JSON and runs if the line includes this string
-- `--no-color`: avoid to wrap colors even if executed in terminal
+- `--prefix`: Set customized prefix to begin the JSON
+- `--skip-by`: Skips to parse JSON and runs if the line includes this string
+- `--no-color`: Avoid to wrap colors even if executed in terminal
+- `--version`: Print the version
 
 ## Motivation
 
