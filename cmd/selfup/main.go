@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
+	"github.com/kachick/selfup/internal/migrate"
 	"github.com/kachick/selfup/internal/runner"
 	"golang.org/x/term"
 	"golang.org/x/xerrors"
@@ -41,6 +42,7 @@ func main() {
 $ selfup run .github/workflows/*.yml
 $ selfup run --prefix='# Update with this json: ' --skip-by='nix run' .github/workflows/*.yml
 $ selfup list .github/workflows/*.yml
+$ selfup migrate .github/workflows/have_beta_schema.yml
 $ selfup --version
 `
 
@@ -72,6 +74,21 @@ $ selfup --version
 	subCommand := os.Args[1]
 	isListMode := subCommand == "list"
 	isRunMode := subCommand == "run"
+	isMigrateMode := subCommand == "migrate"
+	if isMigrateMode {
+		paths := os.Args[2:]
+		for _, path := range paths {
+			isMigrated, err := migrate.Migrate(path)
+			if err != nil {
+				log.Fatalf("%+v", err)
+			}
+			if isMigrated {
+				log.Println(path + ": migrated schema beta -> v1")
+			}
+		}
+
+		return
+	}
 
 	if !(isListMode || isRunMode) {
 		flag.Usage()
