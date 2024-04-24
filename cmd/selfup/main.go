@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/fatih/color"
+	"github.com/kachick/selfup/internal/migrate"
 	"github.com/kachick/selfup/internal/runner"
 	"golang.org/x/term"
 	"golang.org/x/xerrors"
@@ -30,7 +31,7 @@ type Result struct {
 func main() {
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
-	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
+	sharedFlags := flag.NewFlagSet("run|list|migrate", flag.ExitOnError)
 	prefixFlag := sharedFlags.String("prefix", " selfup ", "prefix to begin json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
 	checkFlag := sharedFlags.Bool("check", false, "exit as error if found changes")
@@ -72,8 +73,9 @@ $ selfup --version
 	subCommand := os.Args[1]
 	isListMode := subCommand == "list"
 	isRunMode := subCommand == "run"
+	isMigrateMode := subCommand == "migrate"
 
-	if !(isListMode || isRunMode) {
+	if !(isListMode || isRunMode || isMigrateMode) {
 		flag.Usage()
 		log.Fatalf("Specified unexpected subcommand `%s`", subCommand)
 	}
@@ -84,6 +86,20 @@ $ selfup --version
 	skipBy := *skipByFlag
 	isCheckMode := *checkFlag
 	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
+
+	if isMigrateMode {
+		for _, path := range paths {
+			isMigrated, err := migrate.Migrate(path)
+			if err != nil {
+				log.Fatalf("%+v", err)
+			}
+			if isMigrated {
+				log.Println(path + ": migrated schema beta -> v1")
+			}
+		}
+
+		return
+	}
 
 	if prefix == "" {
 		flag.Usage()
