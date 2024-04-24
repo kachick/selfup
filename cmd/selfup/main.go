@@ -22,17 +22,18 @@ var (
 )
 
 func main() {
+	versionFlag := flag.Bool("version", false, "print the version of this program")
+
 	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
-	prefixFlag := sharedFlags.String("prefix", "", "prefix to write json")
+	prefixFlag := sharedFlags.String("prefix", " selfup ", "prefix to begin json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
 	noColorFlag := sharedFlags.Bool("no-color", false, "disable color output")
-	versionFlag := flag.Bool("version", false, "print the version of this program")
 
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
 
-$ selfup run --prefix='# selfup ' .github/workflows/*.yml
-$ selfup run --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
-$ selfup list --prefix='# selfup ' .github/workflows/*.yml
+$ selfup run .github/workflows/*.yml
+$ selfup run --prefix='# Update with this json: ' --skip-by='nix run' .github/workflows/*.yml
+$ selfup list .github/workflows/*.yml
 $ selfup --version
 `
 
