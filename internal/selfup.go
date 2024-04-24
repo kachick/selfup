@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/huandu/xstrings"
 	"golang.org/x/xerrors"
 )
 
@@ -51,8 +50,8 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 			newLines = append(newLines, line)
 			continue
 		}
-		head, match, tail := xstrings.LastPartition(line, prefix)
-		if head == "" {
+		head, tail, found := strings.Cut(line, prefix)
+		if !found {
 			newLines = append(newLines, line)
 			continue
 		}
@@ -105,7 +104,7 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 			}
 			suffix = fmt.Sprintf(" => %s", replacer)
 		}
-		newLines = append(newLines, replaced+match+tail)
+		newLines = append(newLines, replaced+prefix+tail)
 		fmt.Println(fmt.Sprintf("%s %s:%d: %s", estimation, path, lineNumber, extracted) + suffix)
 	}
 
