@@ -68,6 +68,11 @@ Changed from v0.0.3
 - `--no-color`: Avoid to wrap colors even if executed in terminal
 - `--version`: Print the version
 
+## FAQ
+
+Q: `selfup run .github` does not work. Is there walker option?\
+A: Just taking target paths, recommend to use as this `git ls-files .github | xargs selfup run`
+
 ## Motivation
 
 I'm using this tool to update tool versions in several GitHub actions.\
