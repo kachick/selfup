@@ -5,38 +5,45 @@
     #   - https://discourse.nixos.org/t/differences-between-nix-channels/13998
     # How to update the revision
     #   - `nix flake update --commit-lock-file` # https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    edge-nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      edge-nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        updaterVersion =
-          if (self ? shortRev)
-          then self.shortRev
-          else "dev";
+        edge-pkgs = edge-nixpkgs.legacyPackages.${system};
+        updaterVersion = if (self ? shortRev) then self.shortRev else "dev";
       in
       rec {
-        devShells.default = with pkgs;
+        formatter = edge-pkgs.nixfmt-rfc-style;
+        devShells.default =
+          with pkgs;
           mkShell {
             buildInputs = [
               # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
               bashInteractive
-
-              go_1_22
               nil
-              nixpkgs-fmt
-              dprint
-              actionlint
+              edge-pkgs.nixfmt-rfc-style
+
+              edge-pkgs.go_1_22
+              edge-pkgs.dprint
+              edge-pkgs.goreleaser
+              edge-pkgs.typos
               go-task
-              goreleaser
-              typos
             ];
           };
 
-        packages.selfup = pkgs.buildGo122Module {
+        packages.selfup = edge-pkgs.buildGo122Module {
           pname = "selfup";
           version = updaterVersion;
           src = pkgs.lib.cleanSource self;

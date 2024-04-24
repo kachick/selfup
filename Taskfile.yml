@@ -36,18 +36,19 @@ tasks:
       - typos . .github .vscode --write-changes
       - dprint fmt
       - go fmt ./...
-      - nixpkgs-fmt ./*.nix
+      - nix fmt ./**/*.nix
   lint:
     # go fmt does not have option for no effect - https://github.com/golang/go/issues/41189
+    # nix fmt does not have option for no effect - https://github.com/NixOS/nix/issues/6918
     cmds:
       - dprint check
       - go vet ./...
       - goreleaser check
       - typos . .github .vscode
-      - nixpkgs-fmt --check ./*.nix
   deps:
     cmds:
       - nix --version
+      - nixfmt --version
       - task --version
       - go version
       - dprint --version
