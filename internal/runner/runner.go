@@ -81,7 +81,11 @@ func DryRun(r io.Reader, prefix string, skipBy string) (Result, error) {
 			} else {
 				fields = strings.Split(cmdResult, def.Delimiter)
 			}
-			replacer = fields[def.Nth-1]
+			if def.Nth > len(fields) {
+				return Result{}, xerrors.Errorf("%d: Accessing invalid fields: STDOUT:%s Delimiter:%s Nth:%d", lineNumber, cmdResult, def.Delimiter, def.Nth)
+			}
+			index := def.Nth - 1
+			replacer = fields[index]
 		}
 		extracted := re.FindString(head)
 		replaced := strings.Replace(head, extracted, replacer, 1)

@@ -7,6 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+const defaultPrefix string = " selfup "
+
 func TestDryRun(t *testing.T) {
 	testCases := []struct {
 		description string
@@ -24,7 +26,7 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 No JSON in this line
 not_be_replacedB: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["echo", ":)"] }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     true,
 			want: Result{
@@ -71,7 +73,7 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
 not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "not_be_replaced",
 			ok:     true,
 			want: Result{
@@ -87,11 +89,45 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				Total:        1,
 			},
 		}, {
+			description: "Handle fields",
+			input: `will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "    supertool  0.76.9  "], "nth": 2 }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     true,
+			want: Result{
+				NewLines: []string{
+					`will_be_replaced: '0.76.9' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "    supertool  0.76.9  "], "nth": 2 }`,
+				},
+				Targets: []Target{
+					{LineNumber: 1, Extracted: "0.39.0", Replacer: "0.76.9", IsChanged: true},
+				},
+				ChangedCount: 1,
+				Total:        1,
+			},
+		}, {
+			description: "Special delimiter",
+			input: `will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "supertool:0.76.9"], "nth": 2, "delimiter": ":" }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     true,
+			want: Result{
+				NewLines: []string{
+					`will_be_replaced: '0.76.9' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "supertool:0.76.9"], "nth": 2, "delimiter": ":" }`,
+				},
+				Targets: []Target{
+					{LineNumber: 1, Extracted: "0.39.0", Replacer: "0.76.9", IsChanged: true},
+				},
+				ChangedCount: 1,
+				Total:        1,
+			},
+		}, {
 			description: "Command is not found",
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
 		}, {
@@ -99,7 +135,7 @@ broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_no
 			input: `Header
 broken: ':<' # selfup {{ """" }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
 		}, {
@@ -107,7 +143,7 @@ broken: ':<' # selfup {{ """" }
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "this_command_does_not_exist",
 			ok:     true,
 			want: Result{
@@ -124,7 +160,7 @@ broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_no
 			input: `Header
 broken: ':<' # selfup {{ """" }
 `,
-			prefix: " selfup ",
+			prefix: defaultPrefix,
 			skipBy: "broken",
 			ok:     true,
 			want: Result{
