@@ -67,7 +67,7 @@ func Migrate(path string) (bool, error) {
 	}
 
 	if isMigrated {
-		err = os.WriteFile(path, []byte(strings.Join(newLines, "\n")), fs.ModePerm)
+		err = os.WriteFile(path, []byte(strings.Join(newLines, "\n")+"\n"), fs.ModePerm)
 		if err != nil {
 			return true, err
 		}
