@@ -71,10 +71,21 @@ You can check the running plans with `list` subcommand
 - `--no-color`: Avoid to wrap colors even if executed in terminal
 - `--version`: Print the version
 
+## Examples
+
+- [examples](examples)
+- [workflow file with v0.0.2](https://github.com/kachick/anylang-template/blob/0d50545d31a5b7b878d2738db38654c23cd37ef4/.github/workflows/reusable-update-nixpkgs-and-versions-in-ci.yml#L68) => [result PR](https://github.com/kachick/anylang-template/pull/24)
+
 ## FAQ
 
-Q: `selfup run .github` does not work. Is there walker option?\
-A: Just taking target paths, recommend to use as this `git ls-files .github | xargs selfup run`
+- `selfup run .github` does not work. Is there walker option?
+  - Just taking target paths, recommend to use as this `git ls-files .github | xargs selfup run`
+
+- What are the advantages over version updaters?
+  - [dependabot does not have this feature](https://github.com/dependabot/dependabot-core/issues/9557)
+  - [renovatebot only has it in self-hosted runners](https://github.com/renovatebot/renovate/issues/5004)
+  - In my use case, I need to sync the versions with nixpkgs, not sync with the latest.\
+    Both renovatebot and dependabot will not fit for this use.
 
 ## Motivation
 
@@ -83,5 +94,3 @@ Especially I want to synchronize them with Nix shells.
 
 Nix and the ecosystem provide useful CIs, but the runtime footprint is not small even for small changes.\
 So I'm currently using both Nix CI and some tools CIs.
-
-You can check actual example at [workflow file](https://github.com/kachick/anylang-template/blob/0d50545d31a5b7b878d2738db38654c23cd37ef4/.github/workflows/reusable-update-nixpkgs-and-versions-in-ci.yml#L68), and the [result PR](https://github.com/kachick/anylang-template/pull/24).
