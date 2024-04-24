@@ -15,8 +15,10 @@ import (
 )
 
 type Definition struct {
-	Regex  string
-	Script string
+	Extract   string   `json:"extract"`
+	Command   []string `json:"replacer"`
+	Nth       int      `json:"nth"`
+	Delimiter string   `json:"delimiter"`
 }
 
 type Result struct {
@@ -45,29 +47,44 @@ func Update(path string, prefix string, skipBy string, isColor bool) (Result, er
 	for scanner.Scan() {
 		lineNumber += 1
 		line := scanner.Text()
+		if skipBy != "" && strings.Contains(line, skipBy) {
+			newLines = append(newLines, line)
+			continue
+		}
 		head, match, tail := xstrings.LastPartition(line, prefix)
 		if head == "" {
 			newLines = append(newLines, line)
 			continue
 		}
-		if skipBy != "" && strings.Contains(line, skipBy) {
-			newLines = append(newLines, line)
-			continue
-		}
 
-		definition := &Definition{}
+		def := &Definition{}
 		totalCount += 1
 
-		err = json.Unmarshal([]byte(tail), definition)
+		err = json.Unmarshal([]byte(tail), def)
 		if err != nil {
 			return Result{}, xerrors.Errorf("%s:%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", path, lineNumber, tail, err)
 		}
-		re := regexp.MustCompile(definition.Regex)
-		out, err := exec.Command("bash", "-c", definition.Script).Output()
-		if err != nil {
-			return Result{}, xerrors.Errorf("%s:%d: Executing %s with bash has been failed: %w", path, lineNumber, definition.Script, err)
+		re := regexp.MustCompile(def.Extract)
+		if len(def.Command) < 1 {
+			return Result{}, xerrors.Errorf("%s:%d: Given JSON `%s` does not include commands", path, lineNumber, tail)
 		}
-		replacer := strings.TrimSuffix(string(out), "\n")
+		cmd := def.Command[0]
+		args := def.Command[1:]
+		out, err := exec.Command(cmd, args...).Output()
+		if err != nil {
+			return Result{}, xerrors.Errorf("%s:%d: Executing %s with bash has been failed: %w", path, lineNumber, cmd, err)
+		}
+		cmdResult := strings.TrimSuffix(string(out), "\n")
+		replacer := cmdResult
+		if def.Nth > 0 {
+			var fields []string
+			if def.Delimiter == "" {
+				fields = strings.Fields(cmdResult)
+			} else {
+				fields = strings.Split(cmdResult, def.Delimiter)
+			}
+			replacer = fields[def.Nth-1]
+		}
 		extracted := re.FindString(head)
 		replaced := strings.Replace(head, extracted, replacer, 1)
 		if !isChanged {
