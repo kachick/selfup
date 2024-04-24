@@ -31,7 +31,7 @@ type Result struct {
 func main() {
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
-	sharedFlags := flag.NewFlagSet("run|list|migrate", flag.ExitOnError)
+	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
 	prefixFlag := sharedFlags.String("prefix", " selfup ", "prefix to begin json")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
 	checkFlag := sharedFlags.Bool("check", false, "exit as error if found changes")
@@ -42,6 +42,7 @@ func main() {
 $ selfup run .github/workflows/*.yml
 $ selfup run --prefix='# Update with this json: ' --skip-by='nix run' .github/workflows/*.yml
 $ selfup list .github/workflows/*.yml
+$ selfup migrate .github/workflows/have_beta_schema.yml
 $ selfup --version
 `
 
@@ -74,20 +75,8 @@ $ selfup --version
 	isListMode := subCommand == "list"
 	isRunMode := subCommand == "run"
 	isMigrateMode := subCommand == "migrate"
-
-	if !(isListMode || isRunMode || isMigrateMode) {
-		flag.Usage()
-		log.Fatalf("Specified unexpected subcommand `%s`", subCommand)
-	}
-
-	sharedFlags.Parse(os.Args[2:])
-	paths := sharedFlags.Args()
-	prefix := *prefixFlag
-	skipBy := *skipByFlag
-	isCheckMode := *checkFlag
-	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
-
 	if isMigrateMode {
+		paths := os.Args[2:]
 		for _, path := range paths {
 			isMigrated, err := migrate.Migrate(path)
 			if err != nil {
@@ -100,6 +89,18 @@ $ selfup --version
 
 		return
 	}
+
+	if !(isListMode || isRunMode) {
+		flag.Usage()
+		log.Fatalf("Specified unexpected subcommand `%s`", subCommand)
+	}
+
+	sharedFlags.Parse(os.Args[2:])
+	paths := sharedFlags.Args()
+	prefix := *prefixFlag
+	skipBy := *skipByFlag
+	isCheckMode := *checkFlag
+	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
 
 	if prefix == "" {
 		flag.Usage()
