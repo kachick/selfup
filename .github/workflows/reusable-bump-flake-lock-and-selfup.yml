@@ -79,7 +79,7 @@ jobs:
         run: nix flake update --commit-lock-file
       - name: Update related CI dependencies
         run: |
-          git ls-files .github | xargs nix develop --command nix run github:kachick/selfup/v1.0.0 -- run
+          git ls-files .github | xargs nix develop --command nix run github:kachick/selfup/v1.1.0 -- run
           git diff-index --quiet HEAD || git commit -m '${{ inputs.selfup-commit-message }}' .github
       - name: Run optional step if given
         if: inputs.optional-run != ''
