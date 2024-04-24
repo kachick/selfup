@@ -53,7 +53,7 @@ func Migrate(path string) (bool, error) {
 			Nth:       0,
 			Delimiter: "",
 		}
-		migrated, err := json.Marshal(v1)
+		migrated, err := json.MarshalIndent(v1, " ", "")
 		if err != nil {
 			return false, err
 		}
