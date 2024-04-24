@@ -8,7 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	updater "github.com/kachick/selfup/internal"
+	"github.com/fatih/color"
+	selfup "github.com/kachick/selfup/internal"
 	"golang.org/x/term"
 	"golang.org/x/xerrors"
 )
@@ -20,6 +21,11 @@ var (
 
 	revision = "rev"
 )
+
+type Result struct {
+	Path       string
+	FileResult selfup.Result
+}
 
 func main() {
 	versionFlag := flag.Bool("version", false, "print the version of this program")
@@ -85,23 +91,38 @@ $ selfup --version
 	}
 
 	wg := &sync.WaitGroup{}
-	results := make(chan updater.Result, len(paths))
+	results := make(chan Result, len(paths))
 	for _, path := range paths {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			result, err := updater.Update(path, prefix, skipBy, isColor)
-			if err != nil {
-				log.Fatalf("%+v", err)
-			}
-			results <- result
-			isDirty := result.Changed > 0
+
+			fileResult := func() selfup.Result {
+				file, err := os.Open(path)
+				if err != nil {
+					log.Fatalf("%s: %+v", path, err)
+				}
+				defer file.Close()
+
+				fr, err := selfup.DryRun(file, prefix, skipBy)
+				if err != nil {
+					log.Fatalf("%s: %+v", path, err)
+				}
+				return fr
+			}()
+
+			isDirty := fileResult.ChangedCount > 0
 
 			if isRunMode && isDirty {
-				err := os.WriteFile(path, []byte(strings.Join(result.Lines, "\n")+"\n"), os.ModePerm)
+				err := os.WriteFile(path, []byte(strings.Join(fileResult.Lines, "\n")+"\n"), os.ModePerm)
 				if err != nil {
-					log.Fatalf("%+v", xerrors.Errorf("%s: %w", path, err))
+					log.Fatalf("%s: %+v", path, err)
 				}
+			}
+
+			results <- Result{
+				Path:       path,
+				FileResult: fileResult,
 			}
 		}(path)
 	}
@@ -110,8 +131,24 @@ $ selfup --version
 	total := 0
 	changed := 0
 	for r := range results {
-		total += r.Total
-		changed += r.Changed
+		fr := r.FileResult
+		total += fr.Total
+		changed += fr.ChangedCount
+		for _, t := range fr.Targets {
+			estimation := " "
+			suffix := ""
+			replacer := t.Replacer
+			if t.IsChanged {
+				estimation = "✓"
+				if isColor {
+					green := color.New(color.FgGreen).SprintFunc()
+					estimation = green(estimation)
+					replacer = green(t.Replacer)
+				}
+				suffix = fmt.Sprintf(" => %s", replacer)
+			}
+			fmt.Printf("%s %s:%d: %s%s\n", estimation, r.Path, t.LineNumber, t.Extracted, suffix)
+		}
 	}
 	fmt.Println()
 	if isListMode {

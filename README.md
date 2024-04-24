@@ -49,7 +49,7 @@ You can check the running plans with `list` subcommand
 > selfup list .github/workflows/*.yml
   .github/workflows/lint.yml:17: 0.40.2
 ✓ .github/workflows/release.yml:37: 1.20.0 => 1.42.9
-  .github/workflows/lint.yml:24: 1.16.12
+  .github/workflows/release.yml:50: 3.3.1
 
 1/3 items will be replaced
 ```
