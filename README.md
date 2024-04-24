@@ -30,7 +30,7 @@ Assume some GitHub actions workflow have lines like follows
 ```yaml
 - uses: dprint/check@v2.2
   with:
-    dprint-version: '0.40.2' # selfup { "regex": "\\d[^']+", "script": "dprint --version | cut -d ' ' -f 2" }
+    dprint-version: '0.40.2' # selfup { "extract": "\\d[^']+", "replacer": ["dprint", "--version"], "nth": 2 }
 ```
 
 Then you can call selfup as this
@@ -52,14 +52,19 @@ You can check the running plans with `list` subcommand
 
 ### JSON schema
 
-| Field  | Description                                                                                  |
-| ------ | -------------------------------------------------------------------------------------------- |
-| regex  | [RE2](https://github.com/google/re2/wiki/Syntax), remember to escape meta characters in JSON |
-| script | Bash script to get new string                                                                |
+Changed from v0.0.3
+
+| Field     | Type     | Description                                                                                                    |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| extract   | string   | Golang regex like [RE2](https://github.com/google/re2/wiki/Syntax), remember to escape meta characters in JSON |
+| replacer  | []string | Command and the arguments. Use `["bash", "-c", "your_script \| as_using_pipe"]` for script style               |
+| nth       | number   | Cut the fields, First is `1`, will work no fields mode by default(`0`)                                         |
+| delimiter | string   | Split the STDOUT to make fields, using [strings.Fields](https://pkg.go.dev/strings#Fields) by default(`""`)    |
 
 ### Options
 
-`--skip-by` option skips to parse JSON and runs if the line includes this string
+- `--skip-by`: skips to parse JSON and runs if the line includes this string
+- `--no-color`: avoid to wrap colors even if executed in terminal
 
 ## Motivation
 
