@@ -123,6 +123,13 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				Total:        1,
 			},
 		}, {
+			description: "Command returns unupdatable string",
+			input: `broken_command: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", ":)"] }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     false,
+		}, {
 			description: "Command is not found",
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
