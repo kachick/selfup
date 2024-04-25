@@ -22,7 +22,6 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         edge-pkgs = edge-nixpkgs.legacyPackages.${system};
-        updaterVersion = if (self ? shortRev) then self.shortRev else "dev";
       in
       rec {
         formatter = edge-pkgs.nixfmt-rfc-style;
@@ -43,10 +42,14 @@
             ];
           };
 
-        packages.selfup = edge-pkgs.buildGo122Module {
+        packages.selfup = edge-pkgs.buildGo122Module rec {
           pname = "selfup";
-          version = updaterVersion;
           src = pkgs.lib.cleanSource self;
+          version = "v1.1.1";
+          ldflags = [
+            "-X main.version=${version}"
+            "-X main.commit=${if (self ? rev) then self.rev else "0000000000000000000000000000000000000000"}"
+          ];
 
           # When updating go.mod or go.sum, update this sha together as following
           # vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
