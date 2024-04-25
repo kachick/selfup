@@ -19,14 +19,14 @@ tasks:
       - go build -o ./dist/selfup ./cmd/selfup
   run:
     cmds:
-      - go run ./cmd/selfup run --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
+      - git ls-files -- examples ':!:*beta*' | xargs go run ./cmd/selfup run --skip-by=do_not_update_this_file
   list:
     cmds:
-      - go run ./cmd/selfup list --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
+      - git ls-files -- examples ':!:*beta*' | xargs go run ./cmd/selfup list --skip-by=do_not_update_this_file
   update:
     cmds:
       - nix flake update --commit-lock-file
-      - nix develop --command go run ./cmd/selfup run --prefix='# selfup ' --skip-by='nix run' .github/workflows/*.yml
+      - nix develop --command go run ./cmd/selfup run .github/workflows/*.yml
       - git diff-index --quiet HEAD || git commit -m 'Update CI dependencies with adjusting to nixpkgs' .github
   test:
     cmds:
