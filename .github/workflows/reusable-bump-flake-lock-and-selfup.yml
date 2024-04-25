@@ -16,11 +16,15 @@ on:
         default: 'Bump flake.lock and related dependencies'
         required: false
         type: string
+      version:
+        default: 'v1.1.1'
+        required: false
+        type: string
       pr-body:
         default: |
-          This PR has been created by https://github.com/kachick/selfup/blob/action-v1/.github/workflows/reusable-bump-flake-lock-and-selfup.yml
+          This PR has been created by reusable workflow in https://github.com/kachick/selfup/tree/main/.github/workflows
 
-          Do NOT update the branch of this PR, it may be updated by the bot with force push.
+          Do NOT work in the branch of this PR, it may be updated by the bot with force push.
         required: false
         type: string
       selfup-commit-message:
@@ -79,7 +83,7 @@ jobs:
         run: nix flake update --commit-lock-file
       - name: Update related CI dependencies
         run: |
-          git ls-files .github | xargs nix develop --command nix run github:kachick/selfup/v1.1.1 -- run
+          git ls-files .github | xargs nix develop --command nix run github:kachick/selfup/${{ inputs.version }} -- run
           git diff-index --quiet HEAD || git commit -m '${{ inputs.selfup-commit-message }}' .github
       - name: Run optional step if given
         if: inputs.optional-run != ''
