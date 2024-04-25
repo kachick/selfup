@@ -45,7 +45,7 @@
         packages.selfup = edge-pkgs.buildGo122Module rec {
           pname = "selfup";
           src = pkgs.lib.cleanSource self;
-          version = "v1.1.1";
+          version = "v1.1.2";
           ldflags = [
             "-X main.version=${version}"
             "-X main.commit=${if (self ? rev) then self.rev else "0000000000000000000000000000000000000000"}"
