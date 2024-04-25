@@ -8,6 +8,7 @@ tasks:
       - task: lint
       - task: test
       - task: build
+      - task: list
   install:
     cmds:
       - go install -ldflags "-X main.commit=$(git rev-parse HEAD)"

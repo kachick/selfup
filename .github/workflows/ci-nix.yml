@@ -36,8 +36,3 @@ jobs:
       - run: nix develop --command task deps
       - run: nix develop --command task
       - run: nix run . -- --version
-      - run: |
-          nix develop --command bash -c '
-            git ls-files -- examples ':!:*beta*' | \
-              xargs nix run . -- list --skip-by=this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file
-          '
