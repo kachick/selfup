@@ -45,6 +45,7 @@
 
                 edge-pkgs.go_1_22
                 edge-pkgs.dprint
+                edge-pkgs.yamlfmt
                 edge-pkgs.goreleaser
                 edge-pkgs.typos
                 go-task
