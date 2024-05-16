@@ -38,7 +38,7 @@ tasks:
       - dprint fmt
       - yamlfmt .
       - go fmt ./...
-      - nix fmt ./**/*.nix
+      - git ls-files '*.nix' | xargs nix fmt
   lint:
     # go fmt does not have option for no effect - https://github.com/golang/go/issues/41189
     # nix fmt does not have option for no effect - https://github.com/NixOS/nix/issues/6918
@@ -48,6 +48,8 @@ tasks:
       - go vet ./...
       - goreleaser check
       - typos . .github .vscode
+      # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
+      - git ls-files '*.nix' | xargs nixfmt --check
   deps:
     cmds:
       - nix --version
