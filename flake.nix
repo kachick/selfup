@@ -22,7 +22,6 @@
         "aarch64-linux"
         "i686-linux"
         "x86_64-darwin"
-        # I don't have M1+ mac, providing this for macos-14 free runner https://github.com/actions/runner-images/issues/9741
         "aarch64-darwin"
       ];
     in
