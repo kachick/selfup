@@ -5,16 +5,11 @@
     #   - https://discourse.nixos.org/t/differences-between-nix-channels/13998
     # How to update the revision
     #   - `nix flake update --commit-lock-file` # https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-    edge-nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      edge-nixpkgs,
-    }:
+    { self, nixpkgs }:
     let
       # Candidates: https://github.com/NixOS/nixpkgs/blob/release-23.11/lib/systems/flake-systems.nix
       forAllSystems = nixpkgs.lib.genAttrs [
@@ -26,12 +21,11 @@
       ];
     in
     rec {
-      formatter = forAllSystems (system: edge-nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
       devShells = forAllSystems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          edge-pkgs = edge-nixpkgs.legacyPackages.${system};
         in
         {
           default =
@@ -41,13 +35,13 @@
                 # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
                 bashInteractive
                 nil
-                edge-pkgs.nixfmt-rfc-style
+                nixfmt-rfc-style
 
-                edge-pkgs.go_1_22
-                edge-pkgs.dprint
-                edge-pkgs.yamlfmt
-                edge-pkgs.goreleaser
-                edge-pkgs.typos
+                go_1_22
+                dprint
+                yamlfmt
+                goreleaser
+                typos
                 go-task
               ];
             };
@@ -58,11 +52,10 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          edge-pkgs = edge-nixpkgs.legacyPackages.${system};
           version = "v1.1.2";
         in
         rec {
-          selfup = edge-pkgs.buildGo122Module {
+          selfup = pkgs.buildGo122Module {
             pname = "selfup";
             src = pkgs.lib.cleanSource self;
             version = version;
