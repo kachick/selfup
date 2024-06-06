@@ -10,16 +10,15 @@ import (
 const defaultPrefix string = " selfup "
 
 func TestDryRun(t *testing.T) {
-	testCases := []struct {
-		description string
-		input       string
-		prefix      string
-		skipBy      string
-		ok          bool
-		want        Result
-	}{
-		{
-			description: "Happy Path",
+	type testCase struct {
+		input  string
+		prefix string
+		skipBy string
+		ok     bool
+		want   Result
+	}
+	testCases := map[string]testCase{
+		"Happy Path": {
 			input: `Header
 will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
 not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] }
@@ -46,8 +45,7 @@ not_be_replacedB: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["echo", ":)
 				Total:        3,
 			},
 		},
-		{
-			description: "Another prefix",
+		"Another prefix": {
 			input: `Header
 will_be_replaced: '0.39.0' // Update this line with { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
 not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
@@ -67,8 +65,7 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				ChangedCount: 1,
 				Total:        1,
 			},
-		}, {
-			description: "SkipBy",
+		}, "SkipBy": {
 			input: `Header
 will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
 not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
@@ -88,8 +85,7 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				ChangedCount: 1,
 				Total:        1,
 			},
-		}, {
-			description: "Handle fields",
+		}, "Handle fields": {
 			input: `will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "    supertool  0.76.9  "], "nth": 2 }
 `,
 			prefix: defaultPrefix,
@@ -105,8 +101,7 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				ChangedCount: 1,
 				Total:        1,
 			},
-		}, {
-			description: "Special delimiter",
+		}, "Special delimiter": {
 			input: `will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "supertool:0.76.9"], "nth": 2, "delimiter": ":" }
 `,
 			prefix: defaultPrefix,
@@ -122,31 +117,27 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				ChangedCount: 1,
 				Total:        1,
 			},
-		}, {
-			description: "Command returns unupdatable string",
+		}, "Command returns unupdatable string": {
 			input: `broken_command: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", ":)"] }
 `,
 			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
-		}, {
-			description: "Command is not found",
+		}, "Command is not found": {
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
 `,
 			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
-		}, {
-			description: "Broken JSON",
+		}, "Broken JSON": {
 			input: `Header
 broken: ':<' # selfup {{ """" }
 `,
 			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
-		}, {
-			description: "Prefer SkipBy rather than no command error",
+		}, "Prefer SkipBy rather than no command error": {
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
 `,
@@ -162,8 +153,7 @@ broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_no
 				ChangedCount: 0,
 				Total:        0,
 			},
-		}, {
-			description: "Prefer SkipBy rather than broken JSON error",
+		}, "Prefer SkipBy rather than broken JSON error": {
 			input: `Header
 broken: ':<' # selfup {{ """" }
 `,
@@ -182,8 +172,8 @@ broken: ':<' # selfup {{ """" }
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
+	for what, tc := range testCases {
+		t.Run(what, func(t *testing.T) {
 			result, err := DryRun(strings.NewReader(tc.input), tc.prefix, tc.skipBy)
 			if err != nil {
 				if tc.ok {
