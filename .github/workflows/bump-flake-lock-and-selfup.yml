@@ -16,9 +16,9 @@ jobs:
     uses: ./.github/workflows/reusable-bump-flake-lock-and-selfup.yml
     if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
     with:
+      app_id: ${{ vars.APP_ID }}
       dry-run: ${{ github.event_name == 'pull_request' }}
       optional-run: |
         echo 'Add another changes and git commit here, especially for .node-version/.ruby-version'
     secrets:
-      APP_ID: ${{ secrets.APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}

@@ -34,9 +34,10 @@ on:
       optional-run:
         required: false
         type: string
-    secrets:
-      APP_ID:
+      app_id:
         required: true
+        type: string
+    secrets:
       APP_PRIVATE_KEY:
         required: true
 
@@ -53,7 +54,8 @@ jobs:
         uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
         with:
           # Required to set workflow permission for the APP
-          app-id: ${{ secrets.APP_ID }}
+          # Why replaced from secrets?: https://github.com/github/docs/commit/eaac671cdd9189afd410366e9eb5edd4ee815194#diff-19d2b329775bf781d0cf19fabafa7f231bd85f133cbf9e23594036ea68f7021dL53-R54
+          app-id: ${{ inputs.app_id }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
