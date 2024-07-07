@@ -39,7 +39,6 @@
 
                 go_1_22
                 dprint
-                yamlfmt
                 goreleaser
                 typos
                 go-task

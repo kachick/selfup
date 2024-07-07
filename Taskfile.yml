@@ -36,7 +36,6 @@ tasks:
     cmds:
       - typos . .github .vscode --write-changes
       - dprint fmt
-      - yamlfmt .
       - go fmt ./...
       - git ls-files '*.nix' | xargs nix fmt
   lint:
@@ -44,7 +43,6 @@ tasks:
     # nix fmt does not have option for no effect - https://github.com/NixOS/nix/issues/6918
     cmds:
       - dprint check
-      - yamlfmt -lint .
       - go vet ./...
       - goreleaser check
       - typos . .github .vscode
@@ -57,6 +55,5 @@ tasks:
       - task --version
       - go version
       - dprint --version
-      - yamlfmt -version
       - goreleaser --version
       - typos --version
