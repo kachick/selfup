@@ -64,7 +64,7 @@
             ];
 
             # When updating go.mod or go.sum, update this sha together as following
-            vendorHash = "sha256-XJ3FwOsV2v6cvzo3d7ulNnk3XBYilc0trtdjNRnwE28=";
+            vendorHash = "sha256-iZz69hAX5lS3DuupiBJq6YZdgjxdnulAYlXYmVRZlkw=";
           };
 
           default = selfup;
