@@ -5,9 +5,9 @@ on:
       - '.github/workflows/bump-flake-lock-and-selfup.yml'
       - '.github/workflows/reusable-bump-flake-lock-and-selfup.yml'
   schedule:
-    # Every 10:17 JST
+    # Every 10:17(JST) on Monday
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-    - cron: '17 1 * * *'
+    - cron: '17 1 * * 1'
   workflow_dispatch:
 
 jobs:

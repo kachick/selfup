@@ -9,5 +9,6 @@
   "labels": ["dependencies", "renovate"],
   "nix": {
     "enabled": false
-  }
+  },
+  "schedule": ["on Tuesday"]
 }
