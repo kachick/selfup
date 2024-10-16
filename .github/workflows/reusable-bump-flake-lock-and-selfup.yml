@@ -65,6 +65,15 @@ jobs:
           # Needed to specify token for checkout phase, only in pushing phase is too late
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
           token: ${{ steps.publish-token.outputs.token }}
+      - name: Install selfup
+        run: |
+          install_path="$(mktemp -d)"
+          cd "$install_path"
+          gh release download '${{ inputs.version }}' --pattern '*${{ runner.os }}_${{ runner.arch }}*' --repo kachick/selfup
+          tar -xvzf selfup_*.tar.gz
+          echo "$install_path" | tee -a "$GITHUB_PATH"
+      - name: Make sure the installed selfup version
+        run: selfup --version
       - uses: DeterminateSystems/nix-installer-action@da36cb69b1c3247ad7a1f931ebfd954a1105ef14 # v14
       - uses: DeterminateSystems/magic-nix-cache-action@87b14cf437d03d37989d87f0fa5ce4f5dc1a330b # v8
       - name: Fetch active PRs by me
@@ -85,7 +94,7 @@ jobs:
         run: nix flake update --commit-lock-file
       - name: Update related CI dependencies
         run: |
-          git ls-files .github | xargs nix develop --command nix run github:kachick/selfup/${{ inputs.version }} -- run
+          git ls-files .github | selfup run
           git diff-index --quiet HEAD || git commit -m '${{ inputs.selfup-commit-message }}' .github
       - name: Run optional step if given
         if: inputs.optional-run != ''
