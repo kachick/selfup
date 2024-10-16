@@ -23,6 +23,13 @@ Prebuilt binaries are available for download from [releases](https://github.com/
 selfup VERSION (REV)
 ```
 
+You can also use [gh](https://github.com/cli/cli) command.
+
+```bash
+gh release download 'v1.1.5' --pattern 'selfup_Linux_x86_64.tar.gz' --repo kachick/selfup
+tar -xvzf 'selfup_Linux_x86_64.tar.gz'
+```
+
 ## Usage
 
 ```plaintext
