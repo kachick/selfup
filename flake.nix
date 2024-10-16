@@ -44,7 +44,7 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          version = "v1.1.3";
+          version = "v1.1.4";
         in
         rec {
           selfup = pkgs.buildGo123Module {
