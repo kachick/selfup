@@ -54,8 +54,8 @@ jobs:
         run: |
           install_path="$(mktemp -d)"
           cd "$install_path"
-          gh release download '${{ inputs.version }}' --pattern '*${{ runner.os }}_*${{ runner.arch }}*' --repo kachick/selfup
-          tar -xvzf selfup_*.tar.gz
+          gh release download '${{ inputs.version }}' --pattern 'selfup_Linux_x86_64.tar.gz' --repo kachick/selfup
+          tar -xvzf 'selfup_Linux_x86_64.tar.gz'
           echo "$install_path" | tee -a "$GITHUB_PATH"
       - name: Make sure the installed selfup version
         run: selfup --version
