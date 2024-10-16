@@ -68,7 +68,7 @@
       apps = forAllSystems (system: {
         default = {
           type = "app";
-          program = "${packages.${system}.selfup}/bin/selfup";
+          program = nixpkgs.lib.getExe packages.${system}.selfup;
         };
       });
     };
