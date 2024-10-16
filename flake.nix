@@ -37,7 +37,7 @@
                 nil
                 nixfmt-rfc-style
 
-                go_1_22
+                go_1_23
                 dprint
                 goreleaser
                 typos
@@ -54,7 +54,7 @@
           version = "v1.1.3";
         in
         rec {
-          selfup = pkgs.buildGo122Module {
+          selfup = pkgs.buildGo123Module {
             pname = "selfup";
             src = pkgs.lib.cleanSource self;
             version = version;
