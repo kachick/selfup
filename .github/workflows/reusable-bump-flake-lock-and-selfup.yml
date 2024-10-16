@@ -66,6 +66,8 @@ jobs:
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
           token: ${{ steps.publish-token.outputs.token }}
       - name: Install selfup
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           install_path="$(mktemp -d)"
           cd "$install_path"
