@@ -37,7 +37,7 @@
                 nil
                 nixfmt-rfc-style
 
-                go_1_22
+                go_1_23
                 dprint
                 goreleaser
                 typos
