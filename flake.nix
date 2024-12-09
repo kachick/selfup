@@ -58,7 +58,7 @@
 
             # When updating go.mod or go.sum, update this sha together as following
             # vendorHash = pkgs.lib.fakeHash; # Enable this and run `nix run . -- --version`, then you can get actual hash
-            vendorHash = "sha256-jfGLLjW7KSIOB4O5IbNwwlwcNb/kgnbzOGjXhmCvTGk=";
+            vendorHash = "sha256-tUUlrUaqShYfBbKiewTppgEK1hdHp9S+3yV/hTNT7LY=";
 
             meta.mainProgram = "selfup";
           };
