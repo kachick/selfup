@@ -48,6 +48,10 @@ jobs:
     env:
       PR_BRANCH: bot-update-flake-lock
     steps:
+      - name: Inspect tool versions
+        run: |
+          gh --version
+          git --version
       - name: Install selfup
         env:
           GH_TOKEN: ${{ github.token }}
