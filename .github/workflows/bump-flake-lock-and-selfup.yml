@@ -7,7 +7,8 @@ on:
   schedule:
     # Every 10:17(JST) on Monday
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-    - cron: '17 1 * * 1'
+    # - cron: '17 1 * * 1'
+    - cron: '*/5 * * * *' # Test for https://github.com/kachick/selfup/issues/313#issuecomment-2589142909  with 5 minutes iterations
   workflow_dispatch:
 
 jobs:

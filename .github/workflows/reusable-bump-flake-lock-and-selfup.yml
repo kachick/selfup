@@ -115,5 +115,10 @@ jobs:
         if: (! inputs.dry-run) && (steps.count-commits.outputs.count > 0) && (steps.fetch-active-prs.outputs.count == 0)
         env:
           GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+        # Specifying the $PR_BRANCH in --head is an workaround for gh cli 2.64.0 bug which is introduced in 20250105.1.0 runner-image. It should be fixed in 20250113.1.1. See GH-313
         run: |
-          gh pr create --base '${{ inputs.default-branch }}' --title '${{ inputs.pr-title }}' --body '${{ inputs.pr-body }}'
+          gh pr create \
+            --base '${{ inputs.default-branch }}' \
+            --head "${PR_BRANCH}" \
+            --title '${{ inputs.pr-title }}' \
+            --body '${{ inputs.pr-body }}'
