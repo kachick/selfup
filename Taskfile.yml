@@ -29,6 +29,9 @@ tasks:
       - nix flake update --commit-lock-file
       - nix develop --command go run ./cmd/selfup run .github/workflows/*.yml
       - git diff-index --quiet HEAD || git commit -m 'Update CI dependencies with adjusting to nixpkgs' .github
+  update-vendor-hash:
+    cmds:
+      - nix-update selfup --version=skip --flake
   test:
     cmds:
       - go test ./...

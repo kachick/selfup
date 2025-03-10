@@ -57,9 +57,8 @@
               "-X main.commit=${if (self ? rev) then self.rev else "0000000000000000000000000000000000000000"}"
             ];
 
-            # When updating go.mod or go.sum, update this sha together as following
-            # vendorHash = pkgs.lib.fakeHash; # Enable this and run `nix run . -- --version`, then you can get actual hash
-            vendorHash = "sha256-2vInkLDKngvkBPQ/91RJUibyDrQ4LAsH+1BTWa62hN8=";
+            # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
+            vendorHash = "sha256-EEpkBezmwGr09xbFKdzL5ntbrVqirMQnkUUI5yFdWBI=";
 
             # https://github.com/kachick/times_kachick/issues/316
             # TODO: Use env after nixos-25.05. See https://github.com/NixOS/nixpkgs/commit/905dc8d978b38b0439905cb5cd1faf79163e1f14#diff-b07c2e878ff713081760cd5dcf0b53bb98ee59515a22e6007cc3d974e404b220R24
