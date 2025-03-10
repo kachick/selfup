@@ -29,6 +29,7 @@
                 bashInteractive
                 nil
                 nixfmt-rfc-style
+                nix-update
 
                 go_1_23
                 dprint
@@ -44,7 +45,7 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          version = "v1.1.9";
+          version = "1.1.9";
         in
         rec {
           selfup = pkgs.buildGo123Module {
@@ -52,7 +53,7 @@
             src = pkgs.lib.cleanSource self;
             version = version;
             ldflags = [
-              "-X main.version=${version}"
+              "-X main.version=v${version}"
               "-X main.commit=${if (self ? rev) then self.rev else "0000000000000000000000000000000000000000"}"
             ];
 
