@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  # https://stackoverflow.com/a/71158878/1212807
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   # https://docs.github.com/ja/rest/git/commits?apiVersion=2022-11-28#create-a-commit
   # https://github.com/cli/cli/issues/10365
@@ -29,4 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: '${{ github.token }}'
         run: |
-          ghcp commit --repo '${{ github.repository }}' --branch '${{ github.ref_name }}' --message 'Add testing commit with GitHub API' README.md
+          ghcp commit --repo '${{ github.repository }}' --branch '${{ env.BRANCH_NAME }}' --message 'Add testing commit with GitHub API' README.md
