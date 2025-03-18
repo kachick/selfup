@@ -61,8 +61,18 @@ jobs:
           gh release download '${{ inputs.version }}' --pattern 'selfup_Linux_x86_64.tar.gz' --repo kachick/selfup
           tar -xvzf 'selfup_Linux_x86_64.tar.gz'
           echo "$install_path" | tee -a "$GITHUB_PATH"
-      - name: Make sure the installed selfup version
-        run: selfup --version
+      - name: Install ghcp
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -OL https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
+          unzip ghcp_linux_amd64.zip
+          mkdir --parents /home/runner/.ghcp/bin
+          mv ghcp /home/runner/.ghcp/bin
+          echo '/home/runner/.ghcp/bin' >> $GITHUB_PATH
+      - name: Make sure the installed versions
+        run: |
+          selfup --version
+          ghcp --version
       # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
         id: publish-token
@@ -89,18 +99,29 @@ jobs:
           count="$(gh pr list --author "@me" --state open --head bot-update-flake-lock --json number --jq 'length')"
           echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
       - name: Prepare Git user
+        # Just putting for temporary git commit phase, not used in actual pushed commit via GitHub API
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Prepare Git branch
+        # Required to push branch before commit for use of GitHub API to create commits
         run: |
           git switch "${PR_BRANCH}" || git switch -c "${PR_BRANCH}"
+          git push origin "${PR_BRANCH}"
       - name: Update flake.lock and commit them
-        run: nix flake update --commit-lock-file
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+        # There is no option for just getting the commit message and it will be output to stderr with other warnings.
+        # So committed and extracting with https://stackoverflow.com/questions/3357280/print-commit-message-of-a-given-commit-in-git might be easy for now
+        run: |
+          nix flake update --commit-lock-file
+          ghcp commit --repo '${{ github.repository }}' --branch '${{ env.PR_BRANCH }}' --message "$(git show --no-patch --format=%B HEAD)" flake.lock
       - name: Update related CI dependencies
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
           git ls-files .github | xargs nix develop --command selfup run
-          git diff-index --quiet HEAD || git commit -m '${{ inputs.selfup-commit-message }}' .github
+          git diff-index --quiet HEAD || ghcp commit --repo '${{ github.repository }}' --branch '${{ env.PR_BRANCH }}' --message '${{ inputs.selfup-commit-message }}' .github
       - name: Run optional step if given
         if: inputs.optional-run != ''
         run: ${{ inputs.optional-run }}
@@ -109,8 +130,6 @@ jobs:
         run: |
           count="$(git rev-list --count origin/${{ inputs.default-branch }}..)"
           echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
-      - run: git push origin "${PR_BRANCH}" --force
-        if: (! inputs.dry-run) && (steps.count-commits.outputs.count > 0)
       - name: Create PR
         if: (! inputs.dry-run) && (steps.count-commits.outputs.count > 0) && (steps.fetch-active-prs.outputs.count == 0)
         env:
