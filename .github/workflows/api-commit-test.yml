@@ -1,0 +1,28 @@
+name: GitHub API commit tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # https://docs.github.com/ja/rest/git/commits?apiVersion=2022-11-28#create-a-commit
+  # https://github.com/cli/cli/issues/10365
+  commit:
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ghcp
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
+          unzip /tmp/ghcp.zip -d ~/bin
+      - name: Create diff
+        run: |
+          echo ':)' >> README.md
+      - name: Commit
+        run: |
+          ghcp --repo '${{ github.repository }}' --branch '${{ github.ref_name }}' --message 'Add testing commit with GitHub API' README.md
