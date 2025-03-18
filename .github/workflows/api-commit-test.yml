@@ -17,7 +17,7 @@ jobs:
       - name: Install ghcp
         working-directory: ${{ runner.temp }}
         env:
-          GH_TOKEN: '${{ github.token }}'
+          GITHUB_TOKEN: '${{ github.token }}'
         run: |
           curl -OL https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
           unzip ghcp_linux_amd64.zip
