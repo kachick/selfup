@@ -101,4 +101,3 @@ Especially I want to synchronize them with Nix shells.
 
 Nix and the ecosystem provide useful CIs, but the runtime footprint is not small even for small changes.\
 So I'm currently using both Nix CI and some tools CIs.
-:)
