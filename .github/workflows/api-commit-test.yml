@@ -29,4 +29,4 @@ jobs:
           echo ':)' >> README.md
       - name: Commit
         run: |
-          ghcp --repo '${{ github.repository }}' --branch '${{ github.ref_name }}' --message 'Add testing commit with GitHub API' README.md
+          ghcp commit --repo '${{ github.repository }}' --branch '${{ github.ref_name }}' --message 'Add testing commit with GitHub API' README.md
