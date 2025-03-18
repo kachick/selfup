@@ -16,8 +16,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install ghcp
         working-directory: ${{ runner.temp }}
-        env:
-          GITHUB_TOKEN: '${{ github.token }}'
         run: |
           curl -OL https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
           unzip ghcp_linux_amd64.zip
@@ -28,5 +26,7 @@ jobs:
         run: |
           echo ':)' >> README.md
       - name: Commit
+        env:
+          GITHUB_TOKEN: '${{ github.token }}'
         run: |
           ghcp commit --repo '${{ github.repository }}' --branch '${{ github.ref_name }}' --message 'Add testing commit with GitHub API' README.md
