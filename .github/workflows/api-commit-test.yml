@@ -15,11 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install ghcp
+        working-directory: ${{ runner.temp }}
         env:
           GH_TOKEN: '${{ github.token }}'
         run: |
-          curl -fL -o /tmp/ghcp.zip https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
-          unzip /tmp/ghcp.zip -d ~/bin
+          curl -OL https://github.com/int128/ghcp/releases/download/v1.13.5/ghcp_linux_amd64.zip
+          unzip ghcp_linux_amd64.zip
+          mkdir --parents /home/runner/.ghcp/bin
+          mv ghcp /home/runner/.ghcp/bin
+          echo '/home/runner/.ghcp/bin' >> $GITHUB_PATH
       - name: Create diff
         run: |
           echo ':)' >> README.md
