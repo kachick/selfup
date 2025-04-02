@@ -50,7 +50,10 @@
         rec {
           selfup = pkgs.buildGo123Module {
             pname = "selfup";
-            src = pkgs.lib.cleanSource self;
+            src = pkgs.lib.fileset.toSource rec {
+              root = ./.;
+              fileset = pkgs.lib.fileset.gitTracked root;
+            };
             version = version;
             ldflags = [
               "-X main.version=v${version}"
