@@ -45,32 +45,9 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          version = "1.1.9";
         in
         rec {
-          selfup = pkgs.buildGo123Module {
-            pname = "selfup";
-            src = pkgs.lib.fileset.toSource rec {
-              root = ./.;
-              fileset = pkgs.lib.fileset.gitTracked root;
-            };
-            # src = pkgs.lib.cleanSource self; # Requires this old style if I use nix-update
-            version = version;
-            ldflags = [
-              "-X main.version=v${version}"
-              "-X main.commit=${if (self ? rev) then self.rev else "0000000000000000000000000000000000000000"}"
-            ];
-
-            # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
-            vendorHash = "sha256-HkViZe6DfFOHe6j2R03pH5FV0Y6YXhbGPOraTnTsa6g=";
-
-            # https://github.com/kachick/times_kachick/issues/316
-            # TODO: Use env after nixos-25.05. See https://github.com/NixOS/nixpkgs/commit/905dc8d978b38b0439905cb5cd1faf79163e1f14#diff-b07c2e878ff713081760cd5dcf0b53bb98ee59515a22e6007cc3d974e404b220R24
-            CGO_ENABLED = 0;
-
-            meta.mainProgram = "selfup";
-          };
-
+          selfup = pkgs.callPackage ./package.nix { };
           default = selfup;
         }
       );
