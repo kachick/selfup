@@ -11,10 +11,18 @@ in
 buildGo123Module rec {
   pname = "selfup";
   version = "1.1.9";
-  src = lib.fileset.toSource rec {
-    root = ./.;
-    fileset = lib.fileset.gitTracked root;
-  };
+  src =
+    with lib.fileset;
+    toSource rec {
+      root = ./.;
+      # Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md
+      fileset = intersection (gitTracked root) (unions [
+        ./go.mod
+        ./go.sum
+        ./cmd
+        ./internal
+      ]);
+    };
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
   ldflags = [
     "-X main.version=v${version}"
