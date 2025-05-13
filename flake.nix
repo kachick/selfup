@@ -24,8 +24,12 @@
               env = {
                 # Fix nixd pkgs versions in the inlay hints
                 NIX_PATH = "nixpkgs=${pkgs.path}";
+
                 # For vscode typos extension
                 TYPOS_LSP_PATH = pkgs.lib.getExe pkgs.typos-lsp;
+
+                # For local development, only defined in package.nix is not useful for daily development
+                CGO_ENABLED = 0;
               };
               buildInputs = [
                 # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
