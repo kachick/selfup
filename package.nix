@@ -24,7 +24,6 @@ buildGo124Module rec {
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
   ldflags = [
     "-X main.version=v${version}"
-    "-X main.commit=${"0000000000000000000000000000000000000000"}" # TODO: Remove these revision in version format
   ];
 
   # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`

@@ -18,9 +18,6 @@ import (
 var (
 	// Used in goreleaser
 	version = "dev"
-	commit  = "none"
-
-	revision = "rev"
 )
 
 type Result struct {
@@ -55,10 +52,7 @@ $ selfup --version
 		sharedFlags.Usage()
 	}
 
-	if len(commit) >= 7 {
-		revision = commit[:7]
-	}
-	version := fmt.Sprintf("%s\n", "selfup"+" "+version+" "+"("+revision+")")
+	version := fmt.Sprintf("%s\n", "selfup"+" "+version)
 
 	flag.Parse()
 	if *versionFlag {
