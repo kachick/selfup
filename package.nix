@@ -1,14 +1,13 @@
 {
   lib,
-  buildGo123Module,
+  buildGo124Module,
   versionCheckHook,
 }:
 
 let
   mainProgram = "selfup";
 in
-# TODO: Replace with go 1.24(GH-327) and finalAttrs
-buildGo123Module rec {
+buildGo124Module rec {
   pname = "selfup";
   version = "1.1.9";
   src = lib.fileset.toSource {
@@ -32,8 +31,7 @@ buildGo123Module rec {
   vendorHash = "sha256-rLS2bLpPM0Uo/fhLXTwBTimO0r8Y3IvYvMa3mK36DyQ=";
 
   # https://github.com/kachick/times_kachick/issues/316
-  # TODO: Use env after nixos-25.05. See https://github.com/NixOS/nixpkgs/commit/905dc8d978b38b0439905cb5cd1faf79163e1f14#diff-b07c2e878ff713081760cd5dcf0b53bb98ee59515a22e6007cc3d974e404b220R24
-  CGO_ENABLED = 0;
+  env.CGO_ENABLED = 0;
 
   nativeInstallCheckInputs = [
     versionCheckHook
