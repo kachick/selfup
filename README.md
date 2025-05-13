@@ -11,7 +11,7 @@ In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can sk
 
 ```console
 > nix run github:kachick/selfup/v1.2.0 -- --version
-selfup dev
+selfup v1.2.0
 ```
 
 Prebuilt binaries are available for download from [releases](https://github.com/kachick/selfup/releases)
