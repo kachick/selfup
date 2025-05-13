@@ -11,18 +11,17 @@ in
 buildGo123Module rec {
   pname = "selfup";
   version = "1.1.9";
-  src =
-    with lib.fileset;
-    toSource rec {
-      root = ./.;
-      # Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md
-      fileset = intersection (gitTracked root) (unions [
-        ./go.mod
-        ./go.sum
-        ./cmd
-        ./internal
-      ]);
-    };
+  src = lib.fileset.toSource {
+    root = ./.;
+    # - Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md
+    # - Don't use gitTracked for now, even if filtering with intersection, the feature is not supported in nix-update. See https://github.com/Mic92/nix-update/issues/335
+    fileset = lib.fileset.unions [
+      ./go.mod
+      ./go.sum
+      ./cmd
+      ./internal
+    ];
+  };
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
   ldflags = [
     "-X main.version=v${version}"
