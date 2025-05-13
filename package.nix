@@ -29,7 +29,7 @@ buildGo123Module rec {
   ];
 
   # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
-  vendorHash = "sha256-HkViZe6DfFOHe6j2R03pH5FV0Y6YXhbGPOraTnTsa6g=";
+  vendorHash = "sha256-rLS2bLpPM0Uo/fhLXTwBTimO0r8Y3IvYvMa3mK36DyQ=";
 
   # https://github.com/kachick/times_kachick/issues/316
   # TODO: Use env after nixos-25.05. See https://github.com/NixOS/nixpkgs/commit/905dc8d978b38b0439905cb5cd1faf79163e1f14#diff-b07c2e878ff713081760cd5dcf0b53bb98ee59515a22e6007cc3d974e404b220R24
