@@ -27,7 +27,7 @@ buildGo124Module rec {
   ];
 
   # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
-  vendorHash = "sha256-rLS2bLpPM0Uo/fhLXTwBTimO0r8Y3IvYvMa3mK36DyQ=";
+  vendorHash = "sha256-fkdmmjQJE51irYRT/uY83kgOd9GjU9DQWiYGnP18Iqk=";
 
   # https://github.com/kachick/times_kachick/issues/316
   env.CGO_ENABLED = 0;
