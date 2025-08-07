@@ -14,6 +14,16 @@ In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can sk
 selfup v1.2.0
 ```
 
+You can also use binary cache which defined in [flake](flake.nix) if the user is a trusted-user in your nix.conf.
+
+```bash
+> grep trusted-users /etc/nix/nix.conf
+trusted-users = root your_user
+
+> nix run --accept-flake-config github:kachick/selfup/v1.2.1 -- --version
+selfup v1.2.1
+```
+
 Prebuilt binaries are available for download from [releases](https://github.com/kachick/selfup/releases)
 
 ```console
