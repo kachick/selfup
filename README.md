@@ -17,7 +17,8 @@ In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can sk
 selfup v1.2.1
 ```
 
-You can also use binary cache which defined in [flake](flake.nix) if the user is a trusted-user in your nix.conf.
+You can also use the binary cache defined in the [flake](flake.nix).\
+This is available for tagged versions v1.2.1 and later, but only if the user is a trusted-user in your nix.conf file.
 
 ```bash
 > grep trusted-users /etc/nix/nix.conf
