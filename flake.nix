@@ -43,6 +43,7 @@
                 goreleaser
                 typos
                 go-task
+                zizmor
               ];
             };
         }
