@@ -23,6 +23,8 @@ buildGo124Module (finalAttrs: {
   };
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
   ldflags = [
+    "-s"
+    "-w"
     "-X main.version=v${finalAttrs.version}"
   ];
 
