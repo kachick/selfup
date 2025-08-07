@@ -55,10 +55,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
-      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
-      - run: nix run . -- --version
       - uses: cachix/cachix-action@ad2ddac53f961de1989924296a1f236fcfbaa4fc # v15
         with:
           name: selfup
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix build
+      - run: nix run . -- --version
