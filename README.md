@@ -8,6 +8,8 @@ Replace strings if the line contains the definition of how to update itself.
 
 ## Installation
 
+### Nix
+
 In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can skip installation steps
 
 ```console
@@ -24,6 +26,8 @@ trusted-users = root your_user
 > nix run --accept-flake-config github:kachick/selfup/v1.2.1 -- --version
 selfup v1.2.1
 ```
+
+### Prebuilt-binary
 
 Prebuilt binaries are available for download from [releases](https://github.com/kachick/selfup/releases)
 
