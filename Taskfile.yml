@@ -51,12 +51,3 @@ tasks:
       - typos . .github .vscode
       # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
       - git ls-files '*.nix' | xargs nixfmt --check
-  deps:
-    cmds:
-      - nix --version
-      - nixfmt --version
-      - task --version
-      - go version
-      - dprint --version
-      - goreleaser --version
-      - typos --version
