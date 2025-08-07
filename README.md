@@ -2,6 +2,7 @@
 
 [![CI - Go Status](https://github.com/kachick/selfup/actions/workflows/ci-go.yml/badge.svg?branch=main)](https://github.com/kachick/selfup/actions/workflows/ci-go.yml?query=branch%3Amain+)
 [![CI - Nix Status](https://github.com/kachick/selfup/actions/workflows/ci-nix.yml/badge.svg?branch=main)](https://github.com/kachick/selfup/actions/workflows/ci-nix.yml?query=branch%3Amain+)
+[![Release](https://github.com/kachick/selfup/actions/workflows/release.yml/badge.svg)](https://github.com/kachick/selfup/actions/workflows/release.yml)
 
 Replace strings if the line contains the definition of how to update itself.
 
