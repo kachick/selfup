@@ -35,7 +35,8 @@
                 # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
                 bashInteractive
                 nixd
-                nixfmt-rfc-style
+                nixfmt
+                nixfmt-tree
                 nix-update
 
                 go_1_24
