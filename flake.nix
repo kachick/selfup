@@ -1,4 +1,13 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "https://selfup.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "selfup.cachix.org-1:eY2eEd955BmRI7SultbRIV81vApqpJixunkV3XlXuT8="
+    ];
+  };
+
   inputs = {
     # How to update the revision
     #   - `nix flake update --commit-lock-file` # https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-update.html
@@ -38,6 +47,7 @@
                 nixfmt
                 nixfmt-tree
                 nix-update
+                cachix
 
                 go_1_24
                 dprint
@@ -45,6 +55,7 @@
                 typos
                 go-task
                 zizmor
+                pinact
               ];
             };
         }
