@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: dprint/check@v2.2
         with:
           # This will be changed
@@ -22,6 +24,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       # This will not be changed
       - uses: crate-ci/typos@v1.10.9 # selfup { "extract": "\\d\\.\\d+\\.\\d+", "replacer": ["echo", "1.10.9"] }
         with:
