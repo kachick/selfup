@@ -30,7 +30,7 @@ buildGo124Module rec {
   vendorHash = "sha256-fkdmmjQJE51irYRT/uY83kgOd9GjU9DQWiYGnP18Iqk=";
 
   # https://github.com/kachick/times_kachick/issues/316
-  env.CGO_ENABLED = 0;
+  env.CGO_ENABLED = "0";
 
   nativeInstallCheckInputs = [
     versionCheckHook
