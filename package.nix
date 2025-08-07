@@ -7,7 +7,7 @@
 let
   mainProgram = "selfup";
 in
-buildGo124Module rec {
+buildGo124Module (finalAttrs: {
   pname = "selfup";
   version = "1.2.0";
   src = lib.fileset.toSource {
@@ -23,7 +23,7 @@ buildGo124Module rec {
   };
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
   ldflags = [
-    "-X main.version=v${version}"
+    "-X main.version=v${finalAttrs.version}"
   ];
 
   # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
@@ -45,4 +45,4 @@ buildGo124Module rec {
     homepage = "https://github.com/kachick/selfup";
     license = lib.licenses.mit;
   };
-}
+})
