@@ -17,17 +17,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0 # zizmor: ignore[cache-poisoning]
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
       - name: Wait other jobs
-        uses: kachick/wait-other-jobs@v3
+        uses: kachick/wait-other-jobs@755be1ff093bd2a6a82a24bfc50ef4d9fe491a59 # v3.8.1
         with:
           skip-same-workflow: 'true'
           skip-list: |
@@ -39,7 +39,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         timeout-minutes: 30
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
           distribution: goreleaser

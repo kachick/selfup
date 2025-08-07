@@ -10,6 +10,9 @@ on:
     - cron: '17 1 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   bump:
     # Why split to another file: https://github.com/actions/runner/issues/2274
