@@ -9,7 +9,7 @@ let
 in
 buildGo124Module (finalAttrs: {
   pname = "selfup";
-  version = "1.2.0";
+  version = "1.2.1";
   src = lib.fileset.toSource {
     root = ./.;
     # - Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md

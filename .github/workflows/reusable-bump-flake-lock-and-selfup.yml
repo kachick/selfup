@@ -17,7 +17,7 @@ on:
         required: false
         type: string
       version:
-        default: 'v1.2.0'
+        default: 'v1.2.1'
         required: false
         type: string
       pr-body:
