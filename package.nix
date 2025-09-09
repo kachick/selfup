@@ -1,13 +1,13 @@
 {
   lib,
-  buildGo124Module,
+  buildGo125Module,
   versionCheckHook,
 }:
 
 let
   mainProgram = "selfup";
 in
-buildGo124Module (finalAttrs: {
+buildGo125Module (finalAttrs: {
   pname = "selfup";
   version = "1.2.2";
   src = lib.fileset.toSource {
