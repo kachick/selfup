@@ -49,7 +49,7 @@
                 nix-update
                 cachix
 
-                go_1_24
+                go_1_25
                 dprint
                 goreleaser
                 typos
