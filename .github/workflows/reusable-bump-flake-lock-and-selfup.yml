@@ -85,7 +85,7 @@ jobs:
           # However, this workflow depends on the stored credentials for the subsequent git push command.
           # For this reason, true is required for now.
           persist-credentials: true
-      - uses: DeterminateSystems/nix-installer-action@90bb610b90bf290cad97484ba341453bd1cbefea # v19
+      - uses: DeterminateSystems/nix-installer-action@786fff0690178f1234e4e1fe9b536e94f5433196 # v20
       - name: Fetch active PRs by me
         id: fetch-active-prs
         env:
