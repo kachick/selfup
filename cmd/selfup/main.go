@@ -104,10 +104,7 @@ $ selfup --version
 	wg := &sync.WaitGroup{}
 	results := make(chan Result, len(paths))
 	for _, path := range paths {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-
+		wg.Go(func() {
 			fileResult := func() runner.Result {
 				file, err := os.Open(path)
 				if err != nil {
@@ -135,7 +132,7 @@ $ selfup --version
 				Path:       path,
 				FileResult: fileResult,
 			}
-		}(path)
+		})
 	}
 	wg.Wait()
 	close(results)
