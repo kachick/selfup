@@ -57,7 +57,7 @@ Assume some GitHub actions workflow have lines like follows
 ```yaml
 - uses: dprint/check@v2.2
   with:
-    dprint-version: '0.40.2' # selfup { "extract": "\\d[^']+", "replacer": ["dprint", "--version"], "nth": 2 }
+    dprint-version: '0.40.2' # selfup { "extract": "\\b[0-9.]+", "replacer": ["dprint", "--version"], "nth": 2 }
 ```
 
 Then you can call selfup as this

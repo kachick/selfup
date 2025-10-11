@@ -65,6 +65,27 @@ not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo"
 				ChangedCount: 1,
 				Total:        1,
 			},
+		}, "Unquoted versions": {
+			input: `Header
+will_be_replaced: 0.39.0 # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.76.9"] }
+not_be_replacedA: 0.39.0 # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.39.0"] }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     true,
+			want: Result{
+				NewLines: []string{
+					`Header`,
+					`will_be_replaced: 0.76.9 # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.76.9"] }`,
+					`not_be_replacedA: 0.39.0 # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.39.0"] }`,
+				},
+				Targets: []Target{
+					{LineNumber: 2, Extracted: "0.39.0", Replacer: "0.76.9", IsChanged: true},
+					{LineNumber: 3, Extracted: "0.39.0", Replacer: "0.39.0", IsChanged: false},
+				},
+				ChangedCount: 1,
+				Total:        2,
+			},
 		}, "SkipBy": {
 			input: `Header
 will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
