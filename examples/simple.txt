@@ -1,4 +1,5 @@
-will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
-not_be_replacedA: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] }
+will_be_replacedA: '0.39.0' # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.76.9"] }
+will_be_replacedB: 0.39.0 # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.76.9"] }
+not_be_replacedA: '0.39.0' # selfup { "extract": "\\b[0-9.]+", "replacer": ["echo", "0.39.0"] }
 not_be_replacedB: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["echo", ":)"] }
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
