@@ -105,8 +105,6 @@ $ selfup --version
 	results := make(chan Result, len(paths))
 	for _, path := range paths {
 		wg.Go(func() {
-			defer wg.Done()
-
 			fileResult := func() runner.Result {
 				file, err := os.Open(path)
 				if err != nil {
