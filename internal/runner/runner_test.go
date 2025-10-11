@@ -1,13 +1,14 @@
 package runner
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
 
-const defaultPrefix string = " selfup "
+const defaultPrefix string = "\\s*[#;/]* selfup "
 
 func TestDryRun(t *testing.T) {
 	type testCase struct {
@@ -195,7 +196,8 @@ broken: ':<' # selfup {{ """" }
 
 	for what, tc := range testCases {
 		t.Run(what, func(t *testing.T) {
-			result, err := DryRun(strings.NewReader(tc.input), tc.prefix, tc.skipBy)
+			prefix := regexp.MustCompile(tc.prefix)
+			result, err := DryRun(strings.NewReader(tc.input), prefix, tc.skipBy)
 			if err != nil {
 				if tc.ok {
 					t.Fatalf("unexpected error happened: %v", err)

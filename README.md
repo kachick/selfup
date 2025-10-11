@@ -88,7 +88,7 @@ You can check the running plans with `list` subcommand
 
 ### Options
 
-- `--prefix`: Set customized prefix to begin the JSON
+- `--prefix`: Set customized prefix pattern(RE2) to begin the JSON
 - `--skip-by`: Skips to parse JSON and runs if the line includes this string
 - `--check`: Exit with non 0 value if found changes or the plans
 - `--no-color`: Avoid to wrap colors even if executed in terminal
