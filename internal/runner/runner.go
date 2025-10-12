@@ -32,7 +32,22 @@ type Result struct {
 	Total        int
 }
 
-func DryRun(r io.Reader, prefix string, skipBy string) (Result, error) {
+// Like a ruby's String#partition
+func partition(s string, sep *regexp.Regexp) (before string, separator string, after string, found bool) {
+	location := sep.FindStringIndex(s)
+
+	if location == nil {
+		return "", "", "", false
+	}
+
+	before = s[:location[0]]
+	separator = s[location[0]:location[1]]
+	after = s[location[1]:]
+
+	return before, separator, after, true
+}
+
+func DryRun(r io.Reader, prefix *regexp.Regexp, skipBy string) (Result, error) {
 	newLines := []string{}
 	targets := []Target{}
 
@@ -48,23 +63,22 @@ func DryRun(r io.Reader, prefix string, skipBy string) (Result, error) {
 			newLines = append(newLines, line)
 			continue
 		}
-		head, tail, found := strings.Cut(line, prefix+"{")
-		if !found {
+		headWithVersion, separator, jsonStr, found := partition(line, prefix)
+		if !found || len(jsonStr) == 0 || jsonStr[0] != '{' {
 			newLines = append(newLines, line)
 			continue
 		}
-		tail = "{" + tail
 
 		def := &Definition{}
 		totalCount += 1
 
-		err := json.Unmarshal([]byte(tail), def)
+		err := json.Unmarshal([]byte(jsonStr), def)
 		if err != nil {
-			return Result{}, xerrors.Errorf("%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", lineNumber, tail, err)
+			return Result{}, xerrors.Errorf("%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", lineNumber, jsonStr, err)
 		}
-		re := regexp.MustCompile(def.Extract)
+		extractor := regexp.MustCompile(def.Extract)
 		if len(def.Command) < 1 {
-			return Result{}, xerrors.Errorf("%d: Given JSON `%s` does not include commands", lineNumber, tail)
+			return Result{}, xerrors.Errorf("%d: Given JSON `%s` does not include commands", lineNumber, jsonStr)
 		}
 		cmd := def.Command[0]
 		args := def.Command[1:]
@@ -87,18 +101,18 @@ func DryRun(r io.Reader, prefix string, skipBy string) (Result, error) {
 			index := def.Nth - 1
 			replacer = fields[index]
 		}
-		extracted := re.FindString(head)
-		replaced := strings.Replace(head, extracted, replacer, 1)
+		extracted := extractor.FindString(headWithVersion)
+		replaced := strings.Replace(headWithVersion, extracted, replacer, 1)
 		isChanged := false
-		extractedToEnsure := re.FindString(replaced)
+		extractedToEnsure := extractor.FindString(replaced)
 		if replacer != extractedToEnsure {
 			return Result{}, xerrors.Errorf("%d: The result of updater command has malformed format: %s", lineNumber, replacer)
 		}
-		if replaced != head {
+		if replaced != headWithVersion {
 			isChanged = true
 			changedCount++
 		}
-		newLines = append(newLines, replaced+prefix+tail)
+		newLines = append(newLines, replaced+separator+jsonStr)
 		targets = append(targets, Target{
 			LineNumber: lineNumber,
 			Extracted:  extracted,

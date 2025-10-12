@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -29,7 +30,7 @@ func main() {
 	versionFlag := flag.Bool("version", false, "print the version of this program")
 
 	sharedFlags := flag.NewFlagSet("run|list", flag.ExitOnError)
-	prefixFlag := sharedFlags.String("prefix", " selfup ", "prefix to begin json")
+	prefixFlag := sharedFlags.String("prefix", "\\s*[#;/]* selfup ", "start JSON after this pattern(RE2)")
 	skipByFlag := sharedFlags.String("skip-by", "", "skip to run if the line contains this string")
 	checkFlag := sharedFlags.Bool("check", false, "exit as error if found changes")
 	noColorFlag := sharedFlags.Bool("no-color", false, "disable color output")
@@ -37,10 +38,7 @@ func main() {
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
 
 $ selfup run .github/workflows/*.yml
-$ selfup run --prefix='# Update with this json: ' --skip-by='nix run' .github/workflows/*.yml
-$ selfup list .github/workflows/*.yml
-$ selfup migrate .github/workflows/have_beta_schema.yml
-$ selfup --version
+$ selfup list --check .github/workflows/*.yml
 `
 
 	flag.Usage = func() {
@@ -91,14 +89,19 @@ $ selfup --version
 
 	sharedFlags.Parse(os.Args[2:])
 	paths := sharedFlags.Args()
-	prefix := *prefixFlag
+	prefixStr := *prefixFlag
 	skipBy := *skipByFlag
 	isCheckMode := *checkFlag
 	isColor := term.IsTerminal(int(os.Stdout.Fd())) && !(*noColorFlag)
 
-	if prefix == "" {
+	if prefixStr == "" {
 		flag.Usage()
 		log.Fatalf("%+v", xerrors.New("No prefix is specified"))
+	}
+
+	prefix, err := regexp.Compile(prefixStr)
+	if err != nil {
+		log.Fatalf("Given an invalid regex: `%v`", err)
 	}
 
 	wg := &sync.WaitGroup{}
