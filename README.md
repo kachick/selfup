@@ -18,7 +18,7 @@ selfup v1.3.0
 ```
 
 You can also use the binary cache defined in the [flake](flake.nix).\
-This is available for tagged versions v1.3.0 and later, but only if the user is a trusted-user in your nix.conf file.
+This is available for recent tagged versions, but only if the user is a trusted-user in your nix.conf file.
 
 ```bash
 > grep trusted-users /etc/nix/nix.conf
