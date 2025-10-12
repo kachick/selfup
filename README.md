@@ -13,19 +13,19 @@ Replace strings if the line contains the definition of how to update itself.
 In [Nix](https://nixos.org/) [Flake](https://nixos.wiki/wiki/Flakes), you can skip installation steps
 
 ```console
-> nix run github:kachick/selfup/v1.2.2 -- --version
-selfup v1.2.2
+> nix run github:kachick/selfup/v1.3.0 -- --version
+selfup v1.3.0
 ```
 
 You can also use the binary cache defined in the [flake](flake.nix).\
-This is available for tagged versions v1.2.2 and later, but only if the user is a trusted-user in your nix.conf file.
+This is available for tagged versions v1.3.0 and later, but only if the user is a trusted-user in your nix.conf file.
 
 ```bash
 > grep trusted-users /etc/nix/nix.conf
 trusted-users = root your_user
 
-> nix run --accept-flake-config github:kachick/selfup/v1.2.2 -- --version
-selfup v1.2.2
+> nix run --accept-flake-config github:kachick/selfup/v1.3.0 -- --version
+selfup v1.3.0
 ```
 
 ### Prebuilt-binary
@@ -34,7 +34,7 @@ Prebuilt binaries are available for download from [releases](https://github.com/
 
 ```console
 > install_path="$(mktemp -d)"
-> curl -L https://github.com/kachick/selfup/releases/download/v1.2.2/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
+> curl -L https://github.com/kachick/selfup/releases/download/v1.3.0/selfup_Linux_x86_64.tar.gz | tar xvz -C "$install_path" selfup
 > "${install_path}/selfup" --version
 selfup VERSION
 ```
@@ -42,7 +42,7 @@ selfup VERSION
 You can also use [gh](https://github.com/cli/cli) command.
 
 ```bash
-gh release download 'v1.2.2' --pattern 'selfup_Linux_x86_64.tar.gz' --repo kachick/selfup
+gh release download 'v1.3.0' --pattern 'selfup_Linux_x86_64.tar.gz' --repo kachick/selfup
 tar -xvzf 'selfup_Linux_x86_64.tar.gz'
 ```
 
