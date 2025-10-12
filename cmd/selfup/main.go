@@ -38,8 +38,7 @@ func main() {
 	const usage = `Usage: selfup [SUB] [OPTIONS] [PATH]...
 
 $ selfup run .github/workflows/*.yml
-$ selfup list .github/workflows/*.yml
-$ selfup --version
+$ selfup list --check .github/workflows/*.yml
 `
 
 	flag.Usage = func() {
