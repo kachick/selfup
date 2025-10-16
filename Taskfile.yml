@@ -40,7 +40,7 @@ tasks:
       - typos . .github .vscode --write-changes
       - dprint fmt
       - go fmt ./...
-      - git ls-files '*.nix' | xargs nix fmt
+      - treefmt
   lint:
     # go fmt does not have option for no effect - https://github.com/golang/go/issues/41189
     # nix fmt does not have option for no effect - https://github.com/NixOS/nix/issues/6918
