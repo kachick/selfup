@@ -7,9 +7,9 @@ updates:
     ignore:
       - dependency-name: 'crate-ci/typos'
     groups:
-      determinatesystems-actions:
+      cachix-actions:
         patterns:
-          - 'DeterminateSystems*'
+          - 'cachix*'
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:
