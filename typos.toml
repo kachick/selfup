@@ -1,3 +1,0 @@
-[type.nix.extend-words]
-# Workaround for https://github.com/crate-ci/typos/issues/1474
-substituters = "substituters"
