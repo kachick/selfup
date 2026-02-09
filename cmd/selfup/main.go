@@ -51,7 +51,7 @@ $ selfup list --check .github/workflows/*.yml
 		sharedFlags.Usage()
 	}
 
-	version := fmt.Sprintf("%s\n", "selfup"+" "+version)
+	version := fmt.Sprintf("%s %s", "selfup", version)
 
 	flag.Parse()
 	if *versionFlag {
