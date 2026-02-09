@@ -15,7 +15,7 @@
   };
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, ... }:
     let
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
     in
@@ -67,7 +67,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         rec {
-          selfup = pkgs.callPackage ./package.nix { };
+          selfup = pkgs.callPackage ./package.nix { inherit self; };
           default = selfup;
         }
       );
