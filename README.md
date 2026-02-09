@@ -102,7 +102,7 @@ You can check the plans with the `list` subcommand:
 ## FAQ
 
 - `selfup run .github` does not work. Is there a walker option?
-  - It only takes target paths. One way to use it is: `git ls-files .github | xargs selfup run --`
+  - It only takes target paths. One way to use it is: `git ls-files -z .github | xargs --null selfup run --`
 
 - What are the advantages over other version updaters?
   - [Dependabot does not have this feature.](https://github.com/dependabot/dependabot-core/issues/9557)

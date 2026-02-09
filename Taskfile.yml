@@ -20,10 +20,10 @@ tasks:
       - go build -o ./dist/selfup ./cmd/selfup
   run:
     cmds:
-      - git ls-files -- examples ':!:*beta*' | xargs go run ./cmd/selfup run --skip-by=do_not_update_this_file
+      - git ls-files -z -- examples ':!:*beta*' | xargs --null go run ./cmd/selfup run --skip-by=do_not_update_this_file
   list:
     cmds:
-      - git ls-files -- examples ':!:*beta*' | xargs go run ./cmd/selfup list --skip-by=do_not_update_this_file
+      - git ls-files -z -- examples ':!:*beta*' | xargs --null go run ./cmd/selfup list --skip-by=do_not_update_this_file
   update:
     cmds:
       - nix flake update --commit-lock-file
@@ -50,4 +50,4 @@ tasks:
       - goreleaser check
       - typos . .github .vscode
       # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
-      - git ls-files '*.nix' | xargs nixfmt --check
+      - git ls-files -z '*.nix' | xargs --null nixfmt --check
