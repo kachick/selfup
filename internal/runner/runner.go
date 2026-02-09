@@ -76,7 +76,10 @@ func DryRun(r io.Reader, prefix *regexp.Regexp, skipBy string) (Result, error) {
 		if err != nil {
 			return Result{}, xerrors.Errorf("%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", lineNumber, jsonStr, err)
 		}
-		extractor := regexp.MustCompile(def.Extract)
+		extractor, err := regexp.Compile(def.Extract)
+		if err != nil {
+			return Result{}, xerrors.Errorf("%d: Invalid regex `%s`: %w", lineNumber, def.Extract, err)
+		}
 		if len(def.Command) < 1 {
 			return Result{}, xerrors.Errorf("%d: Given JSON `%s` does not include commands", lineNumber, jsonStr)
 		}

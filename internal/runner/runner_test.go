@@ -162,6 +162,13 @@ broken: ':<' # selfup {{ """" }
 			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
+		}, "Invalid Regex": {
+			input: `Header
+broken: '0.1.0' # selfup { "extract": "[", "replacer": ["echo", "0.2.0"] }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     false,
 		}, "Prefer SkipBy rather than no command error": {
 			input: `Header
 broken: ':<' # selfup { "extract": ":[<\\)]", "replacer": ["this_command_does_not_exist_so_raise_errors_and_do_not_update_this_file"] }
