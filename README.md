@@ -4,7 +4,7 @@
 [![CI - Nix Status](https://github.com/kachick/selfup/actions/workflows/ci-nix.yml/badge.svg?branch=main)](https://github.com/kachick/selfup/actions/workflows/ci-nix.yml?query=branch%3Amain+)
 [![Release](https://github.com/kachick/selfup/actions/workflows/release.yml/badge.svg)](https://github.com/kachick/selfup/actions/workflows/release.yml)
 
-Replace strings if the line contains the definition of how to update itself.
+Replace strings in files using update rules defined in comments.
 
 ## Installation
 
@@ -52,7 +52,7 @@ tar -xvzf 'selfup_Linux_x86_64.tar.gz'
 selfup [SUB] [OPTIONS] [PATH]...
 ```
 
-Assume some GitHub actions workflow have lines like follows
+Assume a GitHub Actions workflow has lines like this:
 
 ```yaml
 - uses: dprint/check@v2.2
@@ -60,13 +60,13 @@ Assume some GitHub actions workflow have lines like follows
     dprint-version: '0.40.2' # selfup { "extract": "\\b[0-9.]+", "replacer": ["dprint", "--version"], "nth": 2 }
 ```
 
-Then you can call selfup as this
+You can run selfup like this:
 
 ```bash
 selfup run .github/workflows/*.yml
 ```
 
-You can check the running plans with `list` subcommand
+You can check the plans with the `list` subcommand:
 
 ```console
 > selfup list .github/workflows/*.yml
@@ -79,20 +79,20 @@ You can check the running plans with `list` subcommand
 
 ### JSON schema
 
-| Field     | Type     | Description                                                                                                    |
-| --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| extract   | string   | Golang regex like [RE2](https://github.com/google/re2/wiki/Syntax), remember to escape meta characters in JSON |
-| replacer  | []string | Command and the arguments. Use `["bash", "-c", "your_script \| as_using_pipe"]` for script style               |
-| nth       | number   | Cut the fields, First is `1`, will work no fields mode by default(`0`)                                         |
-| delimiter | string   | Split the STDOUT to make fields, using [strings.Fields](https://pkg.go.dev/strings#Fields) by default(`""`)    |
+| Field     | Type     | Description                                                                                                     |
+| --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| extract   | string   | Golang regex like [RE2](https://github.com/google/re2/wiki/Syntax). Remember to escape meta-characters in JSON. |
+| replacer  | []string | Command and arguments. Use `["bash", "-c", "your_script \| as_using_pipe"]` for script style.                   |
+| nth       | number   | Field number. The first field is `1`. By default, it uses the whole line (`0`).                                 |
+| delimiter | string   | Separator to split STDOUT into fields. It uses [strings.Fields](https://pkg.go.dev/strings#Fields) by default.  |
 
 ### Options
 
-- `--prefix`: Set customized prefix pattern(RE2) to begin the JSON
-- `--skip-by`: Skips to parse JSON and runs if the line includes this string
-- `--check`: Exit with non 0 value if found changes or the plans
-- `--no-color`: Avoid to wrap colors even if executed in terminal
-- `--version`: Print the version
+- `--prefix`: Set a custom prefix pattern (RE2) before the JSON.
+- `--skip-by`: Skip lines that contain this string.
+- `--check`: Exit with a non-zero code if changes or plans are found.
+- `--no-color`: Disable colored output.
+- `--version`: Print the version.
 
 ## Examples
 
@@ -101,19 +101,19 @@ You can check the running plans with `list` subcommand
 
 ## FAQ
 
-- `selfup run .github` does not work. Is there walker option?
-  - Just taking target paths, one way is using as this `git ls-files .github | xargs selfup run --`
+- `selfup run .github` does not work. Is there a walker option?
+  - It only takes target paths. One way to use it is: `git ls-files .github | xargs selfup run --`
 
-- What are the advantages over version updaters?
-  - [dependabot does not have this feature](https://github.com/dependabot/dependabot-core/issues/9557)
-  - [renovatebot only has it in self-hosted runners](https://github.com/renovatebot/renovate/issues/5004)
-  - In my use case, I need to sync the versions with nixpkgs, not sync with the latest.\
-    Both renovatebot and dependabot will not fit for this use.
+- What are the advantages over other version updaters?
+  - [Dependabot does not have this feature.](https://github.com/dependabot/dependabot-core/issues/9557)
+  - [Renovate only has it in self-hosted runners.](https://github.com/renovatebot/renovate/issues/5004)
+  - In my case, I need to sync versions with nixpkgs, not always the latest.\
+    Both Renovate and Dependabot do not fit this use case.
 
 ## Motivation
 
-I'm using this tool to update tool versions in several GitHub actions.\
-Especially I want to synchronize them with Nix shells.
+I use this tool to update tool versions in several GitHub Actions.
+I especially want to synchronize them with Nix shells.
 
-Nix and the ecosystem provide useful CIs, but the runtime footprint is not small even for small changes.\
-So I'm currently using both Nix CI and some tools CIs.
+Nix and its ecosystem provide useful CI, but the runtime footprint is not small even for small changes.\
+So I currently use both Nix CI and some tool-specific CIs.
