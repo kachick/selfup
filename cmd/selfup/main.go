@@ -24,6 +24,7 @@ var (
 type Result struct {
 	Path       string
 	FileResult runner.Result
+	Err        error
 }
 
 func main() {
@@ -108,26 +109,34 @@ $ selfup list --check .github/workflows/*.yml
 	results := make(chan Result, len(paths))
 	for _, path := range paths {
 		wg.Go(func() {
-			fileResult := func() runner.Result {
+			fileResult, err := func() (runner.Result, error) {
 				file, err := os.Open(path)
 				if err != nil {
-					log.Fatalf("%s: %+v", path, err)
+					return runner.Result{}, err
 				}
 				defer file.Close()
 
-				fr, err := runner.DryRun(file, prefix, skipBy)
-				if err != nil {
-					log.Fatalf("%s: %+v", path, err)
-				}
-				return fr
+				return runner.DryRun(file, prefix, skipBy)
 			}()
+
+			if err != nil {
+				results <- Result{
+					Path: path,
+					Err:  err,
+				}
+				return
+			}
 
 			isDirty := fileResult.ChangedCount > 0
 
 			if isRunMode && isDirty {
 				err := os.WriteFile(path, []byte(strings.Join(fileResult.NewLines, "\n")+"\n"), os.ModePerm)
 				if err != nil {
-					log.Fatalf("%s: %+v", path, err)
+					results <- Result{
+						Path: path,
+						Err:  err,
+					}
+					return
 				}
 			}
 
@@ -141,7 +150,13 @@ $ selfup list --check .github/workflows/*.yml
 	close(results)
 	total := 0
 	changed := 0
+	hasError := false
 	for r := range results {
+		if r.Err != nil {
+			log.Printf("%s: %+v", r.Path, r.Err)
+			hasError = true
+			continue
+		}
 		fr := r.FileResult
 		total += fr.Total
 		changed += fr.ChangedCount
@@ -167,7 +182,8 @@ $ selfup list --check .github/workflows/*.yml
 	} else {
 		fmt.Printf("%d/%d items have been replaced\n", changed, total)
 	}
-	if isCheckMode && (changed > 0) {
+
+	if hasError || (isCheckMode && (changed > 0)) {
 		os.Exit(1)
 	}
 }
