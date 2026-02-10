@@ -49,5 +49,6 @@ tasks:
       - go vet ./...
       - goreleaser check
       - typos . .github .vscode
+      - zizmor .
       # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
       - git ls-files -z '*.nix' | xargs --null nixfmt --check
