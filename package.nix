@@ -22,9 +22,9 @@ buildGo125Module (finalAttrs: {
     ];
   };
   # src = lib.cleanSource self; # Requires this old style if I use nix-update
+  # Don't use `-w`: https://github.com/NixOS/nixpkgs/issues/346380
   ldflags = [
     "-s"
-    "-w"
     "-X main.version=${finalAttrs.version}"
   ];
 
