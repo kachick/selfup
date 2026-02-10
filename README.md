@@ -117,3 +117,8 @@ I especially want to synchronize them with Nix shells.
 
 Nix and its ecosystem provide useful CI, but the runtime footprint is not small even for small changes.\
 So I currently use both Nix CI and some tool-specific CIs.
+
+## Notice
+
+This tool modifies your codebase based on external command results.\
+Please use it only with commands and tools you trust.
