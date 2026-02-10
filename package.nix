@@ -2,7 +2,6 @@
   lib,
   buildGo125Module,
   versionCheckHook,
-  self,
 }:
 
 let
@@ -10,12 +9,7 @@ let
 in
 buildGo125Module (finalAttrs: {
   pname = "selfup";
-  version =
-    let
-      # https://github.com/NixOS/nix/issues/4682#issuecomment-3263194000
-      gitRev = toString (self.shortRev or self.dirtyShortRev or self.lastModified or "DEVELOPMENT");
-    in
-    lib.removePrefix "v" gitRev;
+  version = "1.3.0";
   src = lib.fileset.toSource {
     root = ./.;
     # - Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md

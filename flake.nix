@@ -67,7 +67,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         rec {
-          selfup = pkgs.callPackage ./package.nix { inherit self; };
+          selfup = pkgs.callPackage ./package.nix { };
           default = selfup;
         }
       );
