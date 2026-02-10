@@ -99,7 +99,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Prepare Git branch
         run: |
-          git switch "${PR_BRANCH}" || git switch -c "${PR_BRANCH}"
+          git switch -C "${PR_BRANCH}"
       - name: Update flake.lock and commit them
         run: nix flake update --commit-lock-file
       - name: Update related CI dependencies
