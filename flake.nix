@@ -40,6 +40,11 @@
                 # For local development, only defined in package.nix is not useful for daily development
                 CGO_ENABLED = "0";
               };
+
+              inputsFrom = [
+                self.packages.${system}.selfup
+              ];
+
               buildInputs = [
                 # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
                 bashInteractive
@@ -49,7 +54,6 @@
                 nix-update
                 cachix
 
-                go_1_25
                 dprint
                 goreleaser
                 typos

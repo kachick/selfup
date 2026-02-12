@@ -69,7 +69,7 @@ func DryRun(r io.Reader, prefix *regexp.Regexp, skipBy string) (Result, error) {
 			continue
 		}
 
-		def := &Definition{}
+		def := new(Definition)
 		totalCount += 1
 
 		err := json.Unmarshal([]byte(jsonStr), def)

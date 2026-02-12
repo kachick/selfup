@@ -105,7 +105,7 @@ $ selfup list --check .github/workflows/*.yml
 		log.Fatalf("Given an invalid regex: `%v`", err)
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := new(sync.WaitGroup)
 	results := make(chan Result, len(paths))
 	for _, path := range paths {
 		wg.Go(func() {
