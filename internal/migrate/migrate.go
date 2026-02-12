@@ -38,7 +38,7 @@ func Migrate(path string) (bool, error) {
 			continue
 		}
 
-		beta := &BetaSchema{}
+		beta := new(BetaSchema)
 		err := json.Unmarshal([]byte(tail), beta)
 		if err != nil {
 			return false, err
