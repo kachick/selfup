@@ -85,7 +85,7 @@ jobs:
           # However, this workflow depends on the stored credentials for the subsequent git push command.
           # For this reason, true is required for now.
           persist-credentials: true
-      - uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
+      - uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
       - name: Fetch active PRs by me
         id: fetch-active-prs
         env:
