@@ -65,6 +65,7 @@ jobs:
         run: selfup --version
       # To push workflow changes and trigger CIs
       - name: Generate GitHub Apps token
+        if: (! inputs.dry-run)
         id: publish-token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         with:
@@ -79,7 +80,7 @@ jobs:
           fetch-depth: 0
           # Needed to specify token for checkout phase, only in pushing phase is too late
           # https://github.com/orgs/community/discussions/27072#discussioncomment-3254515
-          token: ${{ steps.publish-token.outputs.token }}
+          token: ${{ inputs.dry-run && github.token || steps.publish-token.outputs.token }}
           # This value is explicitly set to true to prevent regression that occurred in selfup v1.2.1, even though it is the default for actions/checkout.
           # Many linters recommend setting this to false, and most users have requested it as the new default (see https://github.com/actions/checkout/issues/485).
           # However, this workflow depends on the stored credentials for the subsequent git push command.
@@ -89,7 +90,7 @@ jobs:
       - name: Fetch active PRs by me
         id: fetch-active-prs
         env:
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+          GITHUB_TOKEN: ${{ inputs.dry-run && github.token || steps.publish-token.outputs.token }}
         run: |
           count="$(gh pr list --author "@me" --state open --head bot-update-flake-lock --json number --jq 'length')"
           echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
@@ -119,7 +120,7 @@ jobs:
       - name: Create PR
         if: (! inputs.dry-run) && (steps.count-commits.outputs.count > 0) && (steps.fetch-active-prs.outputs.count == 0)
         env:
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+          GITHUB_TOKEN: ${{ inputs.dry-run && github.token || steps.publish-token.outputs.token }}
         # Specifying the $PR_BRANCH in --head is an workaround for gh cli 2.64.0 bug which is introduced in 20250105.1.0 runner-image. It should be fixed in 20250113.1.1. See GH-313
         run: |
           gh pr create \
