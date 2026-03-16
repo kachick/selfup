@@ -6,10 +6,6 @@ updates:
       interval: 'weekly'
     ignore:
       - dependency-name: 'crate-ci/typos'
-    groups:
-      cachix-actions:
-        patterns:
-          - 'cachix*'
     cooldown:
       default-days: 7
   - package-ecosystem: 'gomod'
