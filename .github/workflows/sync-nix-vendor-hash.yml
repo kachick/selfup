@@ -1,0 +1,74 @@
+name: 🔄 Sync Nix vendorHash
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'go.mod'
+      - 'go.sum'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-hash:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    steps:
+      - name: Generate GitHub Apps token
+        id: publish-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ steps.publish-token.outputs.token }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: true
+
+      - uses: NixOS/nix-installer-action@main # There are no tagged releases
+        with:
+          extra-conf: |
+            sandbox = true
+            accept-flake-config = true
+
+      - uses: cachix/cachix-action@1eb2ef646ac0255473d23a5907ad7b04ce94065c # v17
+        with:
+          name: selfup
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Prepare Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Install direnv
+        run: |
+          curl -sfL https://direnv.net/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Load environment variables
+        run: |
+          direnv allow .
+          direnv export gha > "$GITHUB_ENV"
+
+      - name: Bump vendorHash
+        run: |
+          nix-update selfup --version=skip --flake
+
+      - name: Commits
+        run: |
+          git ls-files --modified '**.nix' | xargs git add
+          git update-index -q --really-refresh
+          git diff-index --quiet HEAD || git commit -m 'Bump vendorHash in go packages'
+
+      - name: Push changes
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          if [ "${CURRENT_SHA}" != "${HEAD_SHA}" ]; then
+            git push origin HEAD:"${HEAD_REF}"
+          fi
