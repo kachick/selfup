@@ -16,3 +16,5 @@ rules:
     ignore:
       - reusable-bump-flake-lock-and-selfup.yml
       - cleanup-staging-packages.yml
+  secrets-outside-env:
+    disable: true # TODO: Remove after disabled by default in v1.24.0: https://github.com/zizmorcore/zizmor/commit/9b125b5abe71034910d2bda1a88ba6600da3f64f
