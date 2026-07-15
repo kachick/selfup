@@ -89,7 +89,7 @@ jobs:
           # However, this workflow depends on the stored credentials for the subsequent git push command.
           # For this reason, true is required for now.
           persist-credentials: true
-      - uses: NixOS/nix-installer-action@main # There are no tagged releases
+      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
       - name: Fetch active PRs by me
         id: fetch-active-prs
         env:

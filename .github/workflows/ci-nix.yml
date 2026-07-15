@@ -38,7 +38,7 @@ jobs:
           persist-credentials: false
 
       # Dont' set extra-conf to test the devShell behavior
-      - uses: NixOS/nix-installer-action@main # There are no tagged releases
+      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
       - run: nix flake check
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix develop --command task
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: NixOS/nix-installer-action@main # There are no tagged releases
+      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
         with:
           extra-conf: |
             sandbox = true
