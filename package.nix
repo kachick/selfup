@@ -10,6 +10,9 @@ in
 buildGo126Module (finalAttrs: {
   pname = "selfup";
   version = "1.3.1";
+
+  __structuredAttrs = true;
+
   src = lib.fileset.toSource {
     root = ./.;
     # - Don't just use `fileset.gitTracked root`, then always rebuild even if just changed the README.md
@@ -25,7 +28,8 @@ buildGo126Module (finalAttrs: {
   # Don't use `-w`: https://github.com/NixOS/nixpkgs/issues/346380
   ldflags = [
     "-s"
-    "-X main.version=${finalAttrs.version}"
+    "-X"
+    "main.version=${finalAttrs.version}"
   ];
 
   # When updating go.mod or go.sum, update this sha together with `nix-update selfup --version=skip --flake`
