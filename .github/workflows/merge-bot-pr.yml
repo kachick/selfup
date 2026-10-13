@@ -2,75 +2,32 @@ name: Merge bot PR after CI
 on: pull_request
 
 permissions:
-  contents: write
-  pull-requests: write
-  # checks: read # For private repositories
-  # actions: read # For private repositories
+  contents: read
+  pull-requests: read
 
 jobs:
-  judge-dependabot:
-    timeout-minutes: 5
-    runs-on: ubuntu-slim
-    outputs:
-      merge: ${{ steps.conclusion.outputs.merge }}
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+  merge:
+    timeout-minutes: 30
+    runs-on: ubuntu-26.04
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' ||
+      github.event.pull_request.user.login == 'renovate[bot]' ||
+      github.event.pull_request.user.login == 'gkeeper[bot]'
     steps:
       - name: Dependabot metadata
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
         id: dependabot
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-      - name: Judge
-        id: conclusion
+
+      - name: Check if mergeable for Dependabot
         if: >-
-          steps.dependabot.outputs.update-type != 'version-update:semver-major' ||
-          contains(steps.dependabot.outputs.dependency-names, 'cachix')
-        run: echo -n 'merge=true' | tee -a "$GITHUB_OUTPUT"
-  dependabot:
-    needs: [judge-dependabot]
-    if: ${{ needs.judge-dependabot.outputs.merge == 'true' }}
-    timeout-minutes: 30
-    runs-on: ubuntu-26.04
-    steps:
-      - name: Wait other jobs
-        uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
-        with:
-          skip-same-workflow: 'true'
-          skip-list: |
-            [
-              {
-                "workflowFile": "release.yml"
-              }
-            ]
-        timeout-minutes: 10
-      - name: Approve and merge
-        run: gh pr review --approve "$PR_URL" && gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          github.event.pull_request.user.login == 'dependabot[bot]' &&
+          steps.dependabot.outputs.update-type == 'version-update:semver-major' &&
+          !contains(steps.dependabot.outputs.dependency-names, 'cachix')
+        run: |
+          echo "Skipping auto merge for Dependabot major update"
+          exit 0
 
-  renovate:
-    timeout-minutes: 30
-    runs-on: ubuntu-26.04
-    if: ${{ github.event.pull_request.user.login == 'renovate[bot]' }}
-    steps:
-      - name: Wait other jobs
-        uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
-        with:
-          skip-same-workflow: 'true'
-        timeout-minutes: 10
-      - name: Approve and merge
-        run: gh pr review --approve "$PR_URL" && gh pr merge --auto --squash --delete-branch "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ github.token }}
-
-  # https://github.com/kachick/anylang-template/issues/51
-  selfup-runner:
-    timeout-minutes: 30
-    runs-on: ubuntu-26.04
-    if: ${{ github.event.pull_request.user.login == 'selfup-runner[bot]' }}
-    steps:
-      - name: Dump context to debug
-        run: echo '${{ github.event.pull_request.user.login == 'selfup-runner[bot]' }}'
       - name: Wait other jobs
         uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
         with:
@@ -82,8 +39,18 @@ jobs:
               }
             ]
         timeout-minutes: 20
-      - name: Approve and merge
-        run: gh pr review --approve "$PR_URL" && gh pr merge --auto --delete-branch --squash "$PR_URL"
+
+      - name: Generate GitHub Apps token
+        id: publish-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SAMU_APP_ID }}
+          private-key: ${{ secrets.SAMU_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Auto merge
+        run: gh pr merge --auto --delete-branch --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
