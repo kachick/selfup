@@ -40,41 +40,34 @@ jobs:
       - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
       - name: Install selfup via Nix
         run: nix profile add .#selfup
-      - name: Prepare Git user
+      - name: Prepare Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - name: Prepare Git branch
-        run: git switch -C "${PR_BRANCH}"
+          git switch -C "${PR_BRANCH}"
       - name: Update flake.lock and commit them
         run: nix flake update --commit-lock-file
       - name: Update related CI dependencies
         run: |
           git ls-files -z .github | xargs --null nix develop --command selfup run --
           git diff-index --quiet HEAD || git commit -m 'Sync CI dependencies with nixpkgs' .github
-      - name: Count added commits
-        id: count-commits
+      - name: Push branch and create PR
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
           count="$(git rev-list --count "origin/${DEFAULT_BRANCH}..")"
-          echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
-      - name: Fetch active PRs by me
-        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
-        id: fetch-active-prs
-        env:
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
-        run: |
-          count="$(gh pr list --author "@me" --state open --head "${PR_BRANCH}" --json number --jq 'length')"
-          echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
-      - name: Push branch
-        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
-        run: git push origin "${PR_BRANCH}" --force
-      - name: Create PR
-        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0) && (steps.fetch-active-prs.outputs.count == 0)
-        env:
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
-        run: |
-          gh pr create \
-            --base "${DEFAULT_BRANCH}" \
-            --head "${PR_BRANCH}" \
-            --title 'Bump flake.lock and related dependencies' \
-            --body 'This PR was generated automatically.'
+          if [ "$count" -gt 0 ]; then
+            echo "Found ${count} commit(s). Pushing to ${PR_BRANCH}..."
+            git push origin "${PR_BRANCH}" --force
+
+            if ! gh pr view "${PR_BRANCH}" --json state --jq .state 2>/dev/null | grep -q "OPEN"; then
+              gh pr create \
+                --base "${DEFAULT_BRANCH}" \
+                --head "${PR_BRANCH}" \
+                --title 'Bump flake.lock and related dependencies' \
+                --body 'This PR was generated automatically.'
+            fi
+          else
+            echo "No commits added. Nothing to push or create."
+          fi
