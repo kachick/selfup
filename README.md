@@ -103,15 +103,11 @@ You can check the plans with the `list` subcommand:
 Run `selfup` directly in your workflow steps:
 
 ```yaml
-- run: nix profile add github:kachick/selfup
-- run: git ls-files -z .github | xargs -0 nix develop --command selfup run --
+- run: nix profile add github:kachick/selfup/v1.3.1
+- run: git ls-files -z | xargs -0 nix develop --command selfup run --
 ```
 
 See [bump-flake-lock-and-selfup.yml](./.github/workflows/bump-flake-lock-and-selfup.yml) for a complete workflow example.
-
-> [!NOTE]
-> The reusable workflow in this repository was removed from `main`.
-> Run `selfup` directly in your workflows instead.
 
 ## FAQ
 
