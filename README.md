@@ -100,9 +100,10 @@ You can check the plans with the `list` subcommand:
 
 ## GitHub Actions
 
-Run `selfup` directly in your workflow steps. Make sure replacer commands (such as `dprint` or `typos`) are available in `$PATH` (e.g., loaded via `direnv` or `nix develop`):
+Run `selfup` directly in your workflow steps. Make sure replacer commands are available in `$PATH`:
 
 ```yaml
+- run: nix profile add github:kachick/selfup/v1.3.1
 - run: direnv allow . && direnv export gha > "$GITHUB_ENV"
 - run: git ls-files -z | xargs -0 selfup run --
 ```
