@@ -15,6 +15,7 @@ permissions:
 jobs:
   go:
     runs-on: ubuntu-26.04
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -22,7 +23,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v5.5.0 # zizmor: ignore[cache-poisoning]
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0 # zizmor: ignore[cache-poisoning]
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'

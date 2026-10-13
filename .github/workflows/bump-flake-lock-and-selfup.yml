@@ -38,8 +38,6 @@ jobs:
           # This workflow depends on stored credentials for the subsequent git push command
           persist-credentials: true
       - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
-      - name: Install selfup via Nix
-        run: nix profile add .#selfup
       - name: Prepare Git
         run: |
           git config user.name "github-actions[bot]"
