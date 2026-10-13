@@ -1,0 +1,130 @@
+name: ❄️ Diff
+on:
+  pull_request:
+    paths:
+      - 'flake.lock'
+      - '.github/workflows/nix-diff.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  diff:
+    timeout-minutes: 60
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Required for the base SHA to exist in local git
+          persist-credentials: false
+
+      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
+
+      - name: Diff closures
+        id: diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          SYSTEM="$(nix eval --raw --impure --expr 'builtins.currentSystem')"
+
+          echo "Evaluating PR derivation..."
+          PR_DRV="$(nix path-info --derivation ".#devShells.${SYSTEM}.default")"
+
+          echo "Evaluating base derivation..."
+          BASE_DRV="$(nix path-info --derivation "git+file://${PWD}?rev=${BASE_SHA}#devShells.${SYSTEM}.default")"
+
+          if [ "${PR_DRV}" = "${BASE_DRV}" ]; then
+            echo "No changes in derivation."
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Generating diff..."
+          DIFF="$(nix store diff-closures "${BASE_DRV}" "${PR_DRV}")"
+
+          if [ -z "${DIFF}" ]; then
+            echo "No closure differences found."
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "${DIFF}" > diff.txt
+          echo "has_diff=true" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare comment report
+        if: steps.diff.outputs.has_diff == 'true'
+        id: report
+        env:
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          MAX_SIZE=45000
+          FILE_SIZE="$(wc -c < diff.txt)"
+
+          {
+            echo "### ❄️ Nix Store Diff (flake.lock update)"
+            echo "<!-- nix-diff-report -->"
+            echo ""
+          } > comment.md
+
+          if [ "${FILE_SIZE}" -gt "${MAX_SIZE}" ]; then
+            echo "is_truncated=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "> [!NOTE]"
+              echo "> The diff output is large (${FILE_SIZE} bytes) and has been truncated to fit GitHub comment size limit."
+              echo "> You can check the complete diff in the [Job Artifacts](${SERVER_URL}/${REPOSITORY}/actions/runs/${RUN_ID}#artifacts)."
+              echo ""
+              echo '```text'
+              head -c 40000 diff.txt
+              echo ""
+              echo '```'
+              echo "... (truncated)"
+            } >> comment.md
+          else
+            echo "is_truncated=false" >> "$GITHUB_OUTPUT"
+            {
+              echo '```text'
+              cat diff.txt
+              echo '```'
+            } >> comment.md
+          fi
+
+      - name: Upload full diff artifact
+        if: (steps.diff.outputs.has_diff == 'true') && (steps.report.outputs.is_truncated == 'true')
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: nix-diff-full
+          path: diff.txt
+
+      - name: Minimize old diff comments
+        if: steps.diff.outputs.has_diff == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          gh api -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "repos/{owner}/{repo}/issues/${PR_NUMBER}/comments" --paginate | \
+              jq --raw-output '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("nix-diff-report"))) | .node_id' | \
+              xargs --no-run-if-empty --replace='{node_id}' \
+                gh api graphql --raw-field subjectId="{node_id}" \
+                  --raw-field query='mutation($subjectId:ID!) {
+                    minimizeComment(input: { subjectId: $subjectId, classifier: OUTDATED }) {
+                      minimizedComment { isMinimized }
+                    }
+                  }'
+
+      - name: Post comment
+        if: steps.diff.outputs.has_diff == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "${PR_NUMBER}" --body-file comment.md

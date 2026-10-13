@@ -3,7 +3,6 @@ on:
   pull_request:
     paths:
       - '.github/workflows/bump-flake-lock-and-selfup.yml'
-      - '.github/workflows/reusable-bump-flake-lock-and-selfup.yml'
   schedule:
     # Every 10:17(JST) on Monday
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -11,17 +10,71 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   bump:
-    # Why split to another file: https://github.com/actions/runner/issues/2274
-    uses: $/.github/workflows/reusable-bump-flake-lock-and-selfup.yml
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
     if: (github.event.sender.login == 'kachick') || (github.event_name != 'pull_request')
-    with:
-      app_id: ${{ vars.APP_ID }}
-      dry-run: ${{ github.event_name == 'pull_request' }}
-      optional-run: |
-        echo 'Add another changes and git commit here, especially for .node-version/.ruby-version'
-    secrets:
-      APP_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+    env:
+      PR_BRANCH: bot-update-flake-lock
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - name: Generate GitHub Apps token
+        if: github.event_name != 'pull_request'
+        id: publish-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SAMU_APP_ID }}
+          private-key: ${{ secrets.SAMU_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ github.event_name == 'pull_request' && github.token || steps.publish-token.outputs.token }}
+          # This workflow depends on stored credentials for the subsequent git push command
+          persist-credentials: true
+      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
+      - name: Install selfup via Nix
+        run: nix profile add .#selfup
+      - name: Prepare Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Prepare Git branch
+        run: git switch -C "${PR_BRANCH}"
+      - name: Update flake.lock and commit them
+        run: nix flake update --commit-lock-file
+      - name: Update related CI dependencies
+        run: |
+          git ls-files -z .github | xargs --null nix develop --command selfup run --
+          git diff-index --quiet HEAD || git commit -m 'Sync CI dependencies with nixpkgs' .github
+      - name: Count added commits
+        id: count-commits
+        run: |
+          count="$(git rev-list --count "origin/${DEFAULT_BRANCH}..")"
+          echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
+      - name: Fetch active PRs by me
+        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
+        id: fetch-active-prs
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+        run: |
+          count="$(gh pr list --author "@me" --state open --head "${PR_BRANCH}" --json number --jq 'length')"
+          echo "count=${count}" | tee -a "$GITHUB_OUTPUT"
+      - name: Push branch
+        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0)
+        run: git push origin "${PR_BRANCH}" --force
+      - name: Create PR
+        if: (github.event_name != 'pull_request') && (steps.count-commits.outputs.count > 0) && (steps.fetch-active-prs.outputs.count == 0)
+        env:
+          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+        run: |
+          gh pr create \
+            --base "${DEFAULT_BRANCH}" \
+            --head "${PR_BRANCH}" \
+            --title 'Bump flake.lock and related dependencies' \
+            --body 'This PR was generated automatically.'
