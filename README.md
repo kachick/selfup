@@ -97,7 +97,17 @@ You can check the plans with the `list` subcommand:
 ## Examples
 
 - [examples](examples)
-- [workflow file with v0.0.2](https://github.com/kachick/anylang-template/blob/0d50545d31a5b7b878d2738db38654c23cd37ef4/.github/workflows/reusable-update-nixpkgs-and-versions-in-ci.yml#L68) => [result PR](https://github.com/kachick/anylang-template/pull/24)
+
+## GitHub Actions
+
+Run `selfup` directly in your workflow steps:
+
+```yaml
+- run: nix profile add github:kachick/selfup/v1.3.1
+- run: git ls-files -z | xargs -0 nix develop --command selfup run --
+```
+
+See [bump-flake-lock-and-selfup.yml](./.github/workflows/bump-flake-lock-and-selfup.yml) for a complete workflow example.
 
 ## FAQ
 
