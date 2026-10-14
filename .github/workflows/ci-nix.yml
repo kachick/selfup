@@ -5,6 +5,7 @@ on:
       - 'v*'
     branches: [main]
     paths:
+      - '.github/actions/setup-nix/**'
       - '.github/workflows/ci-nix.yml'
       - '*.nix'
       - 'flake.*'
@@ -13,6 +14,7 @@ on:
       - 'examples/**'
   pull_request:
     paths:
+      - '.github/actions/setup-nix/**'
       - '.github/workflows/ci-nix.yml'
       - '*.nix'
       - 'flake.*'
@@ -44,11 +46,7 @@ jobs:
           persist-credentials: false
 
       # Don't set extra-conf to test the devShell behavior
-      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
-        with:
-          # access-tokens: Prevent GitHub API rate limiting during `nix run github:`
-          extra-conf: |
-            access-tokens = github.com=${{ github.token }}
+      - uses: $/.github/actions/setup-nix
       - run: nix flake check
       - run: nix develop --command echo 'This step should be done before any other "nix develop" steps because of measuring Nix build time'
       - run: nix develop --command task
@@ -67,14 +65,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
+      - uses: $/.github/actions/setup-nix
         with:
-          # access-tokens: Prevent GitHub API rate limiting during `nix run github:`
-          extra-conf: |
-            access-tokens = github.com=${{ github.token }}
-      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-        with:
-          name: selfup
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipPush: ${{ !(startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs['force-push-cache'])) }}
+          cachix-auth-token: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          skip-push: ${{ !(startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs['force-push-cache'])) }}
       - run: nix run . -- --version

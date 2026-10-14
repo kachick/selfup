@@ -8,6 +8,12 @@ updates:
       - dependency-name: 'crate-ci/typos'
     cooldown:
       default-days: 7
+  - package-ecosystem: 'github-actions'
+    directory: '/.github/actions/setup-nix'
+    schedule:
+      interval: 'weekly'
+    cooldown:
+      default-days: 7
   - package-ecosystem: 'gomod'
     directory: '/'
     schedule:

@@ -3,6 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
+      - '.github/actions/setup-nix/**'
       - '.github/workflows/sync-nix-vendor-hash.yml'
       - 'go.mod'
       - 'go.sum'
@@ -30,16 +31,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: true
 
-      - uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
+      - uses: $/.github/actions/setup-nix
         with:
-          # access-tokens: Prevent GitHub API rate limiting during `nix run github:`
-          extra-conf: |
-            access-tokens = github.com=${{ github.token }}
-
-      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-        with:
-          name: selfup
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          cachix-auth-token: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Prepare Git user
         run: |
