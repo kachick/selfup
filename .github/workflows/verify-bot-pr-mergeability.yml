@@ -3,13 +3,14 @@ on: pull_request
 
 # Only read permissions needed.
 # Merging is performed separately by scheduled-bot-merge.yml with GitHub App token.
+# wait-other-jobs is not needed because scheduled-bot-merge checks that all PR status checks are SUCCESS.
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
   verify:
-    timeout-minutes: 30
+    timeout-minutes: 5
     runs-on: ubuntu-26.04
     if: >-
       github.event.pull_request.user.login == 'dependabot[bot]' ||
@@ -31,20 +32,3 @@ jobs:
             echo "::error::Dependabot major update is not eligible for auto-merge"
             exit 1
           fi
-
-      - name: Wait other jobs
-        uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
-        with:
-          skip-same-workflow: 'true'
-          skip-list: |
-            [
-              {
-                "workflowFile": "release.yml"
-              }
-            ]
-        timeout-minutes: 20
-
-      # Do not merge here. This job finishes with SUCCESS when all checks pass.
-      # The scheduled-bot-merge workflow verifies all check runs are successful and merges.
-      - name: Mark as eligible for merge
-        run: echo "PR is eligible for auto-merge"
