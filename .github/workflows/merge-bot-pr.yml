@@ -2,8 +2,8 @@ name: Merge bot PR after CI
 on: pull_request
 
 permissions:
-  contents: read
-  pull-requests: read
+  contents: write
+  pull-requests: write
 
 jobs:
   merge:
@@ -46,19 +46,13 @@ jobs:
             ]
         timeout-minutes: 20
 
-      - name: Generate GitHub Apps token
-        if: steps.check-dependabot.outputs.mergeable != 'false'
-        id: publish-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.SAMU_APP_ID }}
-          private-key: ${{ secrets.SAMU_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
+      # Use GITHUB_TOKEN instead of GitHub App token (e.g., SAMU APP).
+      # Dependabot PRs run in a fork-like context and cannot read Actions secrets,
+      # which causes App token generation to fail:
+      # https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-on-actions#accessing-secrets
       - name: Auto merge
         if: steps.check-dependabot.outputs.mergeable != 'false'
         run: gh pr merge --auto --delete-branch --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ steps.publish-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
