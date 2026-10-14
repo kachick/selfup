@@ -8,9 +8,7 @@ rules:
         dependabot/*: any
         dprint/*: any
         cachix/*: any
-  excessive-permissions:
-    ignore:
-      - merge-bot-pr.yml
+
   template-injection:
     ignore:
       - cleanup-staging-packages.yml
