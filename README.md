@@ -94,15 +94,17 @@ You can check the plans with the `list` subcommand:
 - `--no-color`: Disable colored output.
 - `--version`: Print the version.
 
-## Examples
-
-- [examples](examples)
-
 ## GitHub Actions
 
-### With Nix Flakes (Recommended)
+Make sure `selfup` and all replacer commands are available in `$PATH`:
 
-`selfup` runs replacer commands defined in your files. Instead of loading a full devshell or exporting tools to the global runner PATH, wrap `selfup` and its replacer dependencies with `writeShellApplication`:
+```yaml
+- run: git ls-files -z .github | xargs -0 selfup run --
+```
+
+### For Nix Flakes
+
+Wrap `selfup` and its replacer dependencies such as `writeShellApplication`:
 
 In your `flake.nix`:
 
@@ -152,18 +154,14 @@ In your workflow:
 
 ```yaml
 - uses: NixOS/nix-installer-action@v1
+  with:
+    # access-tokens: Prevent GitHub API rate limiting during `nix run github:`
+    extra-conf: |
+      access-tokens = github.com=${{ github.token }}
 - run: nix run .#update-deps
 ```
 
 See [bump-flake-lock-and-selfup.yml](./.github/workflows/bump-flake-lock-and-selfup.yml) for a complete workflow example.
-
-### Without Nix
-
-Make sure `selfup` and all replacer commands are available in `$PATH`:
-
-```yaml
-- run: git ls-files -z .github | xargs -0 selfup run --
-```
 
 ## FAQ
 
