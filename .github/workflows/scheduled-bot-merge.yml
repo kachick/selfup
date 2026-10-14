@@ -1,0 +1,66 @@
+name: Scheduled bot merge
+on:
+  schedule:
+    # Run every 2 hours at minute 17 to avoid traffic peaks
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  merge:
+    timeout-minutes: 10
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Generate GitHub Apps token
+        id: publish-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SAMU_APP_ID }}
+          private-key: ${{ secrets.SAMU_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Merge first eligible bot PR
+        env:
+          GH_TOKEN: ${{ steps.publish-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          # Fetch open PRs with checks and mergeability
+          prs_json=$(gh pr list \
+            --state open \
+            --json number,title,author,isDraft,mergeable,statusCheckRollup)
+
+          # Allowed bot authors across different GitHub API representations
+          # (e.g. "app/dependabot" in GraphQL vs "dependabot[bot]" in REST/webhooks)
+          allowed_bots='["app/dependabot", "dependabot[bot]", "app/renovate", "renovate[bot]", "app/selfup-runner", "selfup-runner[bot]", "app/gkeeper", "gkeeper[bot]"]'
+
+          # Find the first PR that matches all criteria:
+          # 1. Author is in allowed bots list
+          # 2. Not draft, and mergeable
+          # 3. Has at least 1 check run
+          # 4. All check runs are COMPLETED
+          # 5. All check runs concluded with SUCCESS, SKIPPED, or NEUTRAL
+          target_pr=$(echo "$prs_json" | jq -r --argjson bots "$allowed_bots" '
+            [
+              .[] |
+              select(
+                (.author.login as $a | $bots | index($a)) and
+                (.isDraft | not) and
+                (.mergeable == "MERGEABLE") and
+                ((.statusCheckRollup | length) > 0) and
+                (.statusCheckRollup | all(.status == "COMPLETED")) and
+                (.statusCheckRollup | all(.conclusion == "SUCCESS" or .conclusion == "SKIPPED" or .conclusion == "NEUTRAL"))
+              )
+            ] | first // empty | .number
+          ')
+
+          if [ -n "$target_pr" ]; then
+            echo "Found eligible bot PR #$target_pr. Merging with squash..."
+            gh pr merge --squash --delete-branch "$target_pr"
+            echo "Successfully merged PR #$target_pr."
+          else
+            echo "No eligible bot PR found for merge."
+          fi

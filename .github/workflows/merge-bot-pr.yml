@@ -1,18 +1,21 @@
-name: Merge bot PR after CI
+name: Bot PR merge gate
 on: pull_request
 
+# Only read permissions needed.
+# Merging is performed separately by scheduled-bot-merge.yml with GitHub App token.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
-  merge:
+  gate:
     timeout-minutes: 30
     runs-on: ubuntu-26.04
     if: >-
       github.event.pull_request.user.login == 'dependabot[bot]' ||
       github.event.pull_request.user.login == 'renovate[bot]' ||
-      github.event.pull_request.user.login == 'gkeeper[bot]'
+      github.event.pull_request.user.login == 'gkeeper[bot]' ||
+      github.event.pull_request.user.login == 'selfup-runner[bot]'
     steps:
       - name: Dependabot metadata
         if: github.event.pull_request.user.login == 'dependabot[bot]'
@@ -20,21 +23,17 @@ jobs:
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
 
       - name: Check if mergeable for Dependabot
-        id: check-dependabot
         if: github.event.pull_request.user.login == 'dependabot[bot]'
         env:
           UPDATE_TYPE: ${{ steps.dependabot.outputs.update-type }}
           DEPENDENCY_NAMES: ${{ steps.dependabot.outputs.dependency-names }}
         run: |
           if [ "$UPDATE_TYPE" = 'version-update:semver-major' ] && ! echo "$DEPENDENCY_NAMES" | grep -q 'cachix'; then
-            echo "Skipping auto merge for Dependabot major update"
-            echo "mergeable=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "mergeable=true" >> "$GITHUB_OUTPUT"
+            echo "::error::Dependabot major update is not eligible for auto-merge"
+            exit 1
           fi
 
       - name: Wait other jobs
-        if: steps.check-dependabot.outputs.mergeable != 'false'
         uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
         with:
           skip-same-workflow: 'true'
@@ -46,13 +45,7 @@ jobs:
             ]
         timeout-minutes: 20
 
-      # Use GITHUB_TOKEN instead of GitHub App token (e.g., SAMU APP).
-      # Dependabot PRs run in a fork-like context and cannot read Actions secrets,
-      # which causes App token generation to fail:
-      # https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-on-actions#accessing-secrets
-      - name: Auto merge
-        if: steps.check-dependabot.outputs.mergeable != 'false'
-        run: gh pr merge --auto --delete-branch --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ github.token }}
+      # Do not merge here. This job finishes with SUCCESS when all checks pass.
+      # The scheduled-bot-merge workflow verifies all check runs are successful and merges.
+      - name: Mark as eligible for merge
+        run: echo "PR is eligible for auto-merge"
