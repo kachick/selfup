@@ -65,6 +65,12 @@
         }
       );
 
+      overlays = {
+        default = final: _prev: {
+          selfup = final.callPackage ./package.nix { };
+        };
+      };
+
       packages = forAllSystems (
         system:
         let
@@ -73,6 +79,21 @@
         rec {
           selfup = pkgs.callPackage ./package.nix { };
           default = selfup;
+
+          update-deps = pkgs.writeShellApplication {
+            name = "update-deps";
+            runtimeInputs = [
+              selfup
+              pkgs.git
+              pkgs.findutils
+              pkgs.dprint
+              pkgs.typos
+              pkgs.goreleaser
+            ];
+            text = ''
+              git ls-files -z .github | xargs --null selfup run "$@" --
+            '';
+          };
         }
       );
 
@@ -81,6 +102,10 @@
         default = {
           type = "app";
           program = nixpkgs.lib.getExe packages.${system}.selfup;
+        };
+        update-deps = {
+          type = "app";
+          program = nixpkgs.lib.getExe packages.${system}.update-deps;
         };
       });
     };

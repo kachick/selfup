@@ -100,15 +100,70 @@ You can check the plans with the `list` subcommand:
 
 ## GitHub Actions
 
-Run `selfup` directly in your workflow steps. Make sure replacer commands are available in `$PATH`:
+### With Nix Flakes (Recommended)
+
+`selfup` runs replacer commands defined in your files. Instead of loading a full devshell or exporting tools to the global runner PATH, wrap `selfup` and its replacer dependencies with `writeShellApplication`:
+
+In your `flake.nix`:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
+    selfup.url = "github:kachick/selfup/v1.3.1";
+  };
+
+  outputs =
+    {
+      self,
+      nixpkgs,
+      selfup,
+    }:
+    let
+      forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
+    in
+    {
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          update-deps = pkgs.writeShellApplication {
+            name = "update-deps";
+            runtimeInputs = [
+              selfup.packages.${system}.default
+              pkgs.git
+              pkgs.findutils
+              pkgs.dprint
+              pkgs.typos
+            ];
+            text = ''
+              git ls-files -z .github | xargs --null selfup run "$@" --
+            '';
+          };
+        }
+      );
+    }
+}
+```
+
+In your workflow:
 
 ```yaml
-- run: nix profile add github:kachick/selfup/v1.3.1
-- run: direnv allow . && direnv export gha > "$GITHUB_ENV"
-- run: git ls-files -z | xargs -0 selfup run --
+- uses: NixOS/nix-installer-action@v1
+- run: nix run .#update-deps
 ```
 
 See [bump-flake-lock-and-selfup.yml](./.github/workflows/bump-flake-lock-and-selfup.yml) for a complete workflow example.
+
+### Without Nix
+
+Make sure `selfup` and all replacer commands are available in `$PATH`:
+
+```yaml
+- run: git ls-files -z .github | xargs -0 selfup run --
+```
 
 ## FAQ
 

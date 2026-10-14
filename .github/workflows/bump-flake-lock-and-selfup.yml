@@ -45,18 +45,9 @@ jobs:
           git switch -C "${PR_BRANCH}"
       - name: Update flake.lock and commit them
         run: nix flake update --commit-lock-file
-      - name: Install direnv
-        run: |
-          url="$(nix eval --raw --impure --expr '(builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.nixpkgs.locked.url')"
-          nix profile add "${url}#direnv"
-      - name: Load environment variables
-        run: |
-          direnv allow .
-          direnv export gha > "$GITHUB_ENV"
       - name: Update related CI dependencies
         run: |
-          # Requires replacer commands (e.g. dprint, typos) in PATH; direnv exports devShell tools above
-          git ls-files -z .github | xargs --null selfup run --
+          nix run .#update-deps
           git diff-index --quiet HEAD || git commit -m 'Sync CI dependencies with nixpkgs' .github
       - name: Push branch and create PR
         if: github.event_name != 'pull_request'
