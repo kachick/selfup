@@ -31,12 +31,6 @@ jobs:
         uses: kachick/wait-other-jobs@59f25684252050d78317758cbfea7a5f261960cd # v4.0.0
         with:
           skip-same-workflow: 'true'
-          skip-list: |
-            [
-              {
-                "workflowFile": "verify-bot-pr-mergeability.yml"
-              }
-            ]
         if: startsWith(github.ref, 'refs/tags/')
         timeout-minutes: 30
       - name: Run GoReleaser

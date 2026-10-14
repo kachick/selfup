@@ -11,13 +11,18 @@ prs_json=$(gh pr list \
 # (e.g. "app/dependabot" in GraphQL vs "dependabot[bot]" in REST/webhooks)
 allowed_bots='["app/dependabot", "dependabot[bot]", "app/renovate", "renovate[bot]", "app/samuebot", "samuebot[bot]"]'
 
-# Find all PRs that match criteria:
-# 1. Author is in allowed bots list
-# 2. Not draft, and mergeable
-# 3. Has at least 1 check run
-# 4. All check runs are COMPLETED
-# 5. All check runs concluded with SUCCESS (strict check: no skipped/neutral allowed)
+# NOTE: Security must rely primarily on verified bot logins (author.login) and CI status checks.
+# Do not place full trust in PR title parsing alone, as title-based filters can be fragile.
+# TODO: Relying solely on semver bump types is imperfect. Consider introducing an LLM-based diff review in the future.
 target_prs=$(echo "$prs_json" | jq -r --argjson bots "$allowed_bots" '
+  def is_disallowed_dependabot_major($title):
+    ($title | capture("^Bump (?<pkg>.+) from (?<old>[^ ]+) to (?<new>[^ ]+)$")) as $m |
+    if ($m.pkg | test("cachix")) then
+      false
+    else
+      (($m.old | ltrimstr("v") | split(".")[0]) != ($m.new | ltrimstr("v") | split(".")[0]))
+    end;
+
   [
     .[] |
     select(
@@ -26,7 +31,14 @@ target_prs=$(echo "$prs_json" | jq -r --argjson bots "$allowed_bots" '
       (.mergeable == "MERGEABLE") and
       ((.statusCheckRollup | length) > 0) and
       (.statusCheckRollup | all(.status == "COMPLETED")) and
-      (.statusCheckRollup | all(.conclusion == "SUCCESS"))
+      (.statusCheckRollup | all(.conclusion == "SUCCESS")) and
+      (
+        if (.author.login | test("dependabot")) then
+          (try is_disallowed_dependabot_major(.title) catch false) | not
+        else
+          true
+        end
+      )
     )
   ] | .[].number
 ')

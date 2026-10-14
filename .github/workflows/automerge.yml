@@ -1,4 +1,4 @@
-name: Scheduled bot merge
+name: Automerge bot PRs
 on:
   schedule:
     # Run every 2 hours at minute 17 to avoid traffic peaks
@@ -29,4 +29,4 @@ jobs:
       - name: Merge eligible bot PRs
         env:
           GH_TOKEN: ${{ steps.publish-token.outputs.token }}
-        run: bash .github/scripts/scheduled-bot-merge.sh
+        run: bash .github/scripts/automerge.sh
