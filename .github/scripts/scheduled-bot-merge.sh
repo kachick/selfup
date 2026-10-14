@@ -9,7 +9,7 @@ prs_json=$(gh pr list \
 
 # Allowed bot authors across different GitHub API representations
 # (e.g. "app/dependabot" in GraphQL vs "dependabot[bot]" in REST/webhooks)
-allowed_bots='["app/dependabot", "dependabot[bot]", "app/renovate", "renovate[bot]", "app/gkeeper", "gkeeper[bot]"]'
+allowed_bots='["app/dependabot", "dependabot[bot]", "app/renovate", "renovate[bot]", "app/samuebot", "samuebot[bot]"]'
 
 # Find all PRs that match criteria:
 # 1. Author is in allowed bots list
