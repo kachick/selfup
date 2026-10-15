@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
     inputs:
       target-tag:
-        description: 'Target tag to build and pin (e.g. v1.3.1). If empty, builds current branch/tag'
+        description: 'Target tag to build and pin (e.g. v1.3.1). Always run on main branch and set tag here, do not switch workflow branch in GitHub UI'
         required: false
         type: string
         default: ''

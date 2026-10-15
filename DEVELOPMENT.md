@@ -21,3 +21,13 @@ ok      selfup    0.313s
 > task run -- --version
 selfup dev (rev)
 ```
+
+## Binary cache for released tags
+
+To build and pin binary cache for a released tag into Cachix:
+
+```console
+gh workflow run ci-nix.yml -f target-tag=v1.3.1
+```
+
+Always run this workflow on the `main` branch. Using `gh` prevents choosing the wrong branch in the GitHub Web UI.
