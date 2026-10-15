@@ -73,3 +73,10 @@ jobs:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
         run: |
           nix run --inputs-from . nixpkgs#cachix -- push selfup "$(nix path-info .)"
+      - name: Pin to Cachix
+        if: ${{ matrix.runner == 'ubuntu-26.04' && startsWith(github.ref, 'refs/tags/v') && env.CACHIX_AUTH_TOKEN != '' }}
+        env:
+          CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          PIN_NAME: ${{ github.ref_name }}
+        run: |
+          nix run --inputs-from . nixpkgs#cachix -- pin selfup "$PIN_NAME" "$(nix path-info .)"
