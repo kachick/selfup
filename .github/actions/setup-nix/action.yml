@@ -1,14 +1,5 @@
-name: 'Setup Nix and Cachix'
-description: 'Installs Nix and configures Cachix for caching'
-inputs:
-  cachix-auth-token:
-    description: 'Authentication token for Cachix'
-    required: false
-    default: ''
-  skip-push:
-    description: 'Set to true to only pull from the cache without pushing any build results'
-    required: false
-    default: 'false'
+name: 'Setup Nix'
+description: 'Installs Nix'
 runs:
   using: 'composite'
   steps:
@@ -18,11 +9,3 @@ runs:
         # access-tokens: Prevent GitHub API rate limiting during `nix run github:`
         extra-conf: |
           access-tokens = github.com=${{ github.token }}
-
-    - name: Configure Cachix
-      if: inputs.cachix-auth-token != ''
-      uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-      with:
-        name: selfup
-        authToken: ${{ inputs.cachix-auth-token }}
-        skipPush: ${{ inputs.skip-push }}
