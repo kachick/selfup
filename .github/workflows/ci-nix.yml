@@ -27,6 +27,11 @@ on:
     - cron: '42 1 * * *'
   workflow_dispatch:
     inputs:
+      target-tag:
+        description: 'Target tag to build and pin (e.g. v1.3.1). If empty, builds current branch/tag'
+        required: false
+        type: string
+        default: ''
       force-push-cache:
         description: 'Force push built packages to Cachix even if not on a release tag'
         required: false
@@ -40,6 +45,7 @@ jobs:
   tasks:
     runs-on: ubuntu-26.04
     timeout-minutes: 15
+    if: ${{ !inputs['target-tag'] }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -66,17 +72,30 @@ jobs:
         with:
           persist-credentials: false
       - uses: $/.github/actions/setup-nix
-      - run: nix run . -- --version
+      - name: Build and test package
+        id: build
+        env:
+          TARGET_TAG: ${{ inputs['target-tag'] }}
+        run: |
+          target="."
+          if [ -n "$TARGET_TAG" ]; then
+            target="github:${{ github.repository }}/${TARGET_TAG}"
+          fi
+          store_path=$(nix build --no-link --print-out-paths "$target")
+          echo "store-path=${store_path}" >> "$GITHUB_OUTPUT"
+          "${store_path}/bin/selfup" --version
       - name: Push to Cachix
         if: ${{ matrix.runner == 'ubuntu-26.04' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs['force-push-cache'])) && env.CACHIX_AUTH_TOKEN != '' }}
         env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          STORE_PATH: ${{ steps.build.outputs.store-path }}
         run: |
-          nix run --inputs-from . nixpkgs#cachix -- push selfup "$(nix path-info .)"
+          nix run --inputs-from . nixpkgs#cachix -- push selfup "$STORE_PATH"
       - name: Pin to Cachix
-        if: ${{ matrix.runner == 'ubuntu-26.04' && startsWith(github.ref, 'refs/tags/v') && env.CACHIX_AUTH_TOKEN != '' }}
+        if: ${{ matrix.runner == 'ubuntu-26.04' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs['target-tag'] != '')) && env.CACHIX_AUTH_TOKEN != '' }}
         env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          PIN_NAME: ${{ github.ref_name }}
+          PIN_NAME: ${{ inputs['target-tag'] || github.ref_name }}
+          STORE_PATH: ${{ steps.build.outputs.store-path }}
         run: |
-          nix run --inputs-from . nixpkgs#cachix -- pin selfup "$PIN_NAME" "$(nix path-info .)"
+          nix run --inputs-from . nixpkgs#cachix -- pin selfup "$PIN_NAME" "$STORE_PATH"
