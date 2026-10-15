@@ -1,10 +1,10 @@
 {
   nixConfig = {
     extra-substituters = [
-      "https://selfup.cachix.org"
+      "https://kachick.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "selfup.cachix.org-1:eY2eEd955BmRI7SultbRIV81vApqpJixunkV3XlXuT8="
+      "kachick.cachix.org-1:7giZGKW03gPFkbde09JNpDKCbDGGwBuU/Z11W/jUtEQ="
     ];
   };
 
