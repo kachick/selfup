@@ -17,11 +17,7 @@ allowed_bots='["app/dependabot", "dependabot[bot]", "app/renovate", "renovate[bo
 target_prs=$(echo "$prs_json" | jq -r --argjson bots "$allowed_bots" '
   def is_disallowed_dependabot_major($title):
     ($title | capture("^Bump (?<pkg>.+) from (?<old>[^ ]+) to (?<new>[^ ]+)$")) as $m |
-    if ($m.pkg | test("cachix")) then
-      false
-    else
-      (($m.old | ltrimstr("v") | split(".")[0]) != ($m.new | ltrimstr("v") | split(".")[0]))
-    end;
+    (($m.old | ltrimstr("v") | split(".")[0]) != ($m.new | ltrimstr("v") | split(".")[0]));
 
   [
     .[] |
