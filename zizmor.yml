@@ -1,0 +1,6 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Allow reusable workflows from kachick/workflows to track main branch
+        kachick/*: any
