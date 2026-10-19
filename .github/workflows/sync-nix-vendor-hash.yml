@@ -7,7 +7,7 @@ name: 🔄 Sync Nix vendorHash
 on:
   workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: ['CI - Go']
-    types: [completed]
+    types: [requested]
   workflow_dispatch:
     inputs:
       branch:
@@ -25,7 +25,6 @@ jobs:
     if: >-
       (github.event_name == 'workflow_dispatch') ||
       (github.event.workflow_run.event == 'pull_request' &&
-       github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.actor.login == 'dependabot[bot]' &&
        startsWith(github.event.workflow_run.head_branch, 'dependabot/go_modules/'))
     steps:
