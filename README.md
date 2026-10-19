@@ -91,6 +91,14 @@ Make sure `selfup` and all replacer commands are available in `$PATH`:
 - run: git ls-files -z .github | xargs -0 selfup run --
 ```
 
+### With zizmor
+
+When using [zizmor](https://github.com/woodruffw/zizmor) inline ignores on the same line, place the `zizmor` comment before `selfup`:
+
+```yaml
+- uses: crate-ci/typos@v1.50.3 # zizmor: ignore[unpinned-uses] # selfup {"extract":"\\d\\.\\d+\\.\\d+","replacer":["typos", "--version"], "nth": 2}
+```
+
 ### For Nix Flakes
 
 Wrap `selfup` and its replacer dependencies such as `writeShellApplication`:
