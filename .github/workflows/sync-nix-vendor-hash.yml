@@ -1,21 +1,33 @@
 name: 🔄 Sync Nix vendorHash
+# Why workflow_run instead of pull_request:
+# pull_request events triggered by Dependabot cannot access repository secrets
+# (SAMU_APP_PRIVATE_KEY) to generate a GitHub App token.
+# Running under workflow_run executes in the default branch context where secrets
+# are accessible, and pushing with the App token cleanly triggers downstream CI.
 on:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - '.github/actions/setup-nix/**'
-      - '.github/workflows/sync-nix-vendor-hash.yml'
-      - 'go.mod'
-      - 'go.sum'
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: ['CI - Go']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Target branch to sync'
+        required: true
+        type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   sync-hash:
     runs-on: ubuntu-26.04
     timeout-minutes: 60
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    if: >-
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.actor.login == 'dependabot[bot]' &&
+       startsWith(github.event.workflow_run.head_branch, 'dependabot/go_modules/'))
     steps:
       - name: Generate GitHub Apps token
         id: publish-token
@@ -25,44 +37,67 @@ jobs:
           private-key: ${{ secrets.SAMU_APP_PRIVATE_KEY }}
           permission-contents: write
 
+      - name: Determine target branch
+        id: target
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
+          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          branch="${INPUT_BRANCH:-$RUN_BRANCH}"
+          if [ -z "${branch}" ]; then
+            echo "Target branch could not be determined" >&2
+            exit 1
+          fi
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.publish-token.outputs.token }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ steps.target.outputs.branch }}
           persist-credentials: true
 
+      - name: Check if already synced
+        id: check-synced
+        run: |
+          set -euo pipefail
+          initial_sha="$(git rev-parse HEAD)"
+          echo "initial_sha=${initial_sha}" >> "$GITHUB_OUTPUT"
+          if [ "$(git log -1 --format=%s)" = "Bump vendorHash in go packages" ]; then
+            echo "Branch is already synced"
+            echo "synced=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "synced=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: $/.github/actions/setup-nix
+        if: steps.check-synced.outputs.synced == 'false'
 
       - name: Prepare Git user
+        if: steps.check-synced.outputs.synced == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Install direnv
-        run: |
-          url="$(nix eval --raw --impure --expr '(builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.nixpkgs.locked.url')"
-          nix profile add "${url}#direnv"
-      - name: Load environment variables
-        run: |
-          direnv allow .
-          direnv export gha > "$GITHUB_ENV"
-
       - name: Bump vendorHash
+        if: steps.check-synced.outputs.synced == 'false'
         run: |
-          nix-update selfup --version=skip --flake
+          nix develop --command nix-update selfup --version=skip --flake
 
       - name: Commits
+        if: steps.check-synced.outputs.synced == 'false'
         run: |
           git ls-files --modified '**.nix' | xargs git add
           git update-index -q --really-refresh
           git diff-index --quiet HEAD || git commit -m 'Bump vendorHash in go packages'
 
       - name: Push changes
+        if: steps.check-synced.outputs.synced == 'false'
         env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ steps.target.outputs.branch }}
+          INITIAL_SHA: ${{ steps.check-synced.outputs.initial_sha }}
         run: |
           CURRENT_SHA=$(git rev-parse HEAD)
-          if [ "${CURRENT_SHA}" != "${HEAD_SHA}" ]; then
+          if [ "${CURRENT_SHA}" != "${INITIAL_SHA}" ]; then
             git push origin HEAD:"${HEAD_REF}"
           fi
