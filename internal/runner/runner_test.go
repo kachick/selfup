@@ -229,6 +229,27 @@ broken: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"
 			prefix: defaultPrefix,
 			skipBy: "",
 			ok:     false,
+		}, "Preceding comment before selfup": {
+			input: `Header
+will_be_replaced: '0.39.0' # zizmor: ignore[unpinned-uses] # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }
+not_be_replaced: '0.39.0' // inline memo // selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] }
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     true,
+			want: Result{
+				NewLines: []string{
+					`Header`,
+					`will_be_replaced: '0.76.9' # zizmor: ignore[unpinned-uses] # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] }`,
+					`not_be_replaced: '0.39.0' // inline memo // selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] }`,
+				},
+				Targets: []Target{
+					{LineNumber: 2, Extracted: "0.39.0", Replacer: "0.76.9", IsChanged: true},
+					{LineNumber: 3, Extracted: "0.39.0", Replacer: "0.39.0", IsChanged: false},
+				},
+				ChangedCount: 1,
+				Total:        2,
+			},
 		},
 	}
 
