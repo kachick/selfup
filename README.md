@@ -93,7 +93,7 @@ Make sure `selfup` and all replacer commands are available in `$PATH`:
 
 ### With zizmor
 
-When using [zizmor](https://github.com/woodruffw/zizmor) inline ignores on the same line, place the `zizmor` comment before `selfup`:
+[zizmor](https://github.com/woodruffw/zizmor) inline ignores can be used together on the same line:
 
 ```yaml
 - uses: crate-ci/typos@v1.50.3 # zizmor: ignore[unpinned-uses] # selfup {"extract":"\\d\\.\\d+\\.\\d+","replacer":["typos", "--version"], "nth": 2}

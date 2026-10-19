@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"golang.org/x/xerrors"
 )
@@ -72,9 +74,18 @@ func DryRun(r io.Reader, prefix *regexp.Regexp, skipBy string) (Result, error) {
 		def := new(Definition)
 		totalCount += 1
 
-		err := json.Unmarshal([]byte(jsonStr), def)
+		dec := json.NewDecoder(strings.NewReader(jsonStr))
+		err := dec.Decode(def)
 		if err != nil {
 			return Result{}, xerrors.Errorf("%d: Unmarsharing `%s` as JSON has been failed, check the given prefix: %w", lineNumber, jsonStr, err)
+		}
+		offset := dec.InputOffset()
+		remaining := strings.TrimLeft(jsonStr[offset:], " \t")
+		if len(remaining) > 0 {
+			first, _ := utf8.DecodeRuneInString(remaining)
+			if first >= 128 || unicode.IsLetter(first) || unicode.IsDigit(first) || first == '{' {
+				return Result{}, xerrors.Errorf("%d: Unexpected character `%c` after JSON in `%s`", lineNumber, first, jsonStr)
+			}
 		}
 		extractor, err := regexp.Compile(def.Extract)
 		if err != nil {

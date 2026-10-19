@@ -201,6 +201,34 @@ broken: ':<' # selfup {{ """" }
 				ChangedCount: 0,
 				Total:        0,
 			},
+		}, "Trailing comment after JSON": {
+			input: `Header
+will_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] } # zizmor: ignore[unpinned-uses]
+not_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] } // another comment
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     true,
+			want: Result{
+				NewLines: []string{
+					`Header`,
+					`will_be_replaced: '0.76.9' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] } # zizmor: ignore[unpinned-uses]`,
+					`not_be_replaced: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.39.0"] } // another comment`,
+				},
+				Targets: []Target{
+					{LineNumber: 2, Extracted: "0.39.0", Replacer: "0.76.9", IsChanged: true},
+					{LineNumber: 3, Extracted: "0.39.0", Replacer: "0.39.0", IsChanged: false},
+				},
+				ChangedCount: 1,
+				Total:        2,
+			},
+		}, "Trailing invalid text after JSON": {
+			input: `Header
+broken: '0.39.0' # selfup { "extract": "\\d[^']+", "replacer": ["echo", "0.76.9"] } invalid text
+`,
+			prefix: defaultPrefix,
+			skipBy: "",
+			ok:     false,
 		},
 	}
 
