@@ -1,19 +1,17 @@
 name: 🔄 Sync Nix vendorHash
-# Why workflow_run instead of pull_request:
-# pull_request events triggered by Dependabot cannot access repository secrets
-# (SAMU_APP_PRIVATE_KEY) to generate a GitHub App token.
-# Running under workflow_run executes in the default branch context where secrets
-# are accessible, and pushing with the App token cleanly triggers downstream CI.
+# Why schedule sweep instead of pull_request or workflow_run:
+# - pull_request triggered by Dependabot cannot access repository secrets
+#   (SAMU_APP_PRIVATE_KEY) to generate a GitHub App token without Dependabot secrets.
+# - workflow_run executes with access to repository secrets, but is flagged as
+#   fundamentally insecure (dangerous-triggers) by zizmor and introduces supply
+#   chain risks when checking out untrusted PR branches.
+# Periodic sweeps on the default branch keep credentials in trusted repository
+# contexts without silencing security warnings.
 on:
-  workflow_run: # zizmor: ignore[dangerous-triggers]
-    workflows: ['CI - Go']
-    types: [requested]
+  schedule:
+    # Run every 2 hours at minute 15 to avoid traffic peaks and prepare bot PRs before automerge runs at minute 45
+    - cron: '15 */2 * * *'
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Target branch to sync'
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -21,12 +19,7 @@ permissions:
 jobs:
   sync-hash:
     runs-on: ubuntu-26.04
-    timeout-minutes: 60
-    if: >-
-      (github.event_name == 'workflow_dispatch') ||
-      (github.event.workflow_run.event == 'pull_request' &&
-       github.event.workflow_run.actor.login == 'dependabot[bot]' &&
-       startsWith(github.event.workflow_run.head_branch, 'dependabot/go_modules/'))
+    timeout-minutes: 30
     steps:
       - name: Generate GitHub Apps token
         id: publish-token
@@ -36,67 +29,58 @@ jobs:
           private-key: ${{ secrets.SAMU_APP_PRIVATE_KEY }}
           permission-contents: write
 
-      - name: Determine target branch
-        id: target
-        env:
-          INPUT_BRANCH: ${{ inputs.branch }}
-          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
-        run: |
-          set -euo pipefail
-          branch="${INPUT_BRANCH:-$RUN_BRANCH}"
-          if [ -z "${branch}" ]; then
-            echo "Target branch could not be determined" >&2
-            exit 1
-          fi
-          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.publish-token.outputs.token }}
-          ref: ${{ steps.target.outputs.branch }}
           persist-credentials: true
 
-      - name: Check if already synced
-        id: check-synced
-        run: |
-          set -euo pipefail
-          initial_sha="$(git rev-parse HEAD)"
-          echo "initial_sha=${initial_sha}" >> "$GITHUB_OUTPUT"
-          if [ "$(git log -1 --format=%s)" = "Bump vendorHash in go packages" ]; then
-            echo "Branch is already synced"
-            echo "synced=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "synced=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: $/.github/actions/setup-nix
-        if: steps.check-synced.outputs.synced == 'false'
 
       - name: Prepare Git user
-        if: steps.check-synced.outputs.synced == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump vendorHash
-        if: steps.check-synced.outputs.synced == 'false'
-        run: |
-          nix develop --command nix-update selfup --version=skip --flake
-
-      - name: Commits
-        if: steps.check-synced.outputs.synced == 'false'
-        run: |
-          git ls-files --modified '**.nix' | xargs git add
-          git update-index -q --really-refresh
-          git diff-index --quiet HEAD || git commit -m 'Bump vendorHash in go packages'
-
-      - name: Push changes
-        if: steps.check-synced.outputs.synced == 'false'
+      - name: Sync vendorHash for open Dependabot PRs
         env:
-          HEAD_REF: ${{ steps.target.outputs.branch }}
-          INITIAL_SHA: ${{ steps.check-synced.outputs.initial_sha }}
+          GH_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
-          CURRENT_SHA=$(git rev-parse HEAD)
-          if [ "${CURRENT_SHA}" != "${INITIAL_SHA}" ]; then
-            git push origin HEAD:"${HEAD_REF}"
+          set -euo pipefail
+
+          branches=$(gh pr list \
+            --author "app/dependabot" \
+            --state open \
+            --json headRefName \
+            --jq '.[] | select(.headRefName | startswith("dependabot/go_modules/")) | .headRefName')
+
+          if [ -z "${branches}" ]; then
+            echo "No open Dependabot Go PRs found"
+            exit 0
           fi
+
+          for branch in ${branches}; do
+            echo "Checking ${branch}..."
+            git fetch origin "${branch}"
+            git checkout -B "${branch}" "origin/${branch}"
+            git reset --hard HEAD
+            git clean -fd
+
+            if [ "$(git log -1 --format=%s)" = "Bump vendorHash in go packages" ]; then
+              echo "Branch ${branch} is already synced"
+              continue
+            fi
+
+            before_sha=$(git rev-parse HEAD)
+            nix develop --command nix-update selfup --version=skip --flake
+
+            git ls-files --modified '**.nix' | xargs git add
+            git update-index -q --really-refresh
+            git diff-index --cached --quiet HEAD || git commit -m 'Bump vendorHash in go packages'
+
+            if [ "$(git rev-parse HEAD)" != "${before_sha}" ]; then
+              echo "Pushing updated vendorHash for ${branch}..."
+              git push origin "${branch}"
+            else
+              echo "No vendorHash changes needed for ${branch}"
+            fi
+          done
