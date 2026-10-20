@@ -49,4 +49,4 @@ tasks:
       - typos . .github .vscode
       - zizmor .
       - git ls-files -z '*.sh' | xargs --null --no-run-if-empty shellcheck
-      - dprint check --check
+      - dprint check
