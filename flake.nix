@@ -20,7 +20,16 @@
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
     in
     rec {
-      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+      formatter = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.writeShellScriptBin "dprint-fmt" ''
+          exec "${nixpkgs.lib.getExe pkgs.dprint}" fmt "$@"
+        ''
+      );
+
       devShells = forAllSystems (
         system:
         let
@@ -49,15 +58,12 @@
                 # https://github.com/NixOS/nix/issues/730#issuecomment-162323824
                 bashInteractive
                 nixd
-                nixfmt
-                nixfmt-tree
                 nix-update
                 cachix
 
                 dprint
                 goreleaser
                 typos
-                shellcheck
                 go-task
                 zizmor
                 pinact
