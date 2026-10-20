@@ -40,10 +40,8 @@ tasks:
       - typos . .github .vscode --write-changes
       - dprint fmt
       - go fmt ./...
-      - treefmt
   lint:
     # go fmt does not have option for no effect - https://github.com/golang/go/issues/41189
-    # nix fmt does not have option for no effect - https://github.com/NixOS/nix/issues/6918
     cmds:
       - dprint check
       - go vet ./...
@@ -51,5 +49,4 @@ tasks:
       - typos . .github .vscode
       - zizmor .
       - git ls-files -z '*.sh' | xargs --null --no-run-if-empty shellcheck
-      # nix fmt doesn't have check: https://github.com/NixOS/nix/issues/6918
-      - git ls-files -z '*.nix' | xargs --null nixfmt --check
+      - dprint check --check
