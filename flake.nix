@@ -64,7 +64,6 @@
                 dprint
                 goreleaser
                 typos
-                shellcheck
                 go-task
                 zizmor
                 pinact
