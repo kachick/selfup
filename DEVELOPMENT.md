@@ -34,5 +34,5 @@ Always run this workflow on the `main` branch. Using `gh` prevents choosing the 
 
 Note:
 
-- Pins use the `selfup-<version>-<system>` format (e.g. `selfup-1.3.1-x86_64-linux`).
+- Pins use the `selfup-<version>-<system>` format (e.g. `selfup-1.3.1-x86_64-linux`) and keep up to 3 revisions.
 - Only official release tags matching `^v[0-9]+\.[0-9]+\.[0-9]+$` are pushed and pinned (pre-releases such as `-beta` are skipped).

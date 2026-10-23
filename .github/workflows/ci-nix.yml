@@ -105,4 +105,4 @@ jobs:
           PIN_NAME: ${{ steps.build.outputs.pin-name }}
           STORE_PATH: ${{ steps.build.outputs.store-path }}
         run: |
-          nix run --inputs-from . nixpkgs#cachix -- pin kachick "$PIN_NAME" "$STORE_PATH"
+          nix run --inputs-from . nixpkgs#cachix -- pin kachick "$PIN_NAME" "$STORE_PATH" --keep-revisions 3
