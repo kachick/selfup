@@ -87,8 +87,9 @@ jobs:
 
           raw_tag="${TARGET_TAG:-${GITHUB_REF_NAME}}"
           if [[ "$raw_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            system=$(nix eval --raw --impure --expr builtins.currentSystem)
             echo "is-release-tag=true" >> "$GITHUB_OUTPUT"
-            echo "pin-name=selfup-${raw_tag#v}" >> "$GITHUB_OUTPUT"
+            echo "pin-name=selfup-${raw_tag#v}-${system}" >> "$GITHUB_OUTPUT"
           fi
       - name: Push to Cachix
         if: ${{ matrix.runner == 'ubuntu-26.04' && (steps.build.outputs.is-release-tag == 'true' || (github.event_name == 'workflow_dispatch' && inputs['force-push-cache'])) && env.CACHIX_AUTH_TOKEN != '' }}
