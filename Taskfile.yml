@@ -1,4 +1,5 @@
-# https://taskfile.dev
+# https://taskfile.dev/styleguide/
+# Avoid chaining commands with ; or && in a single line. Use multiple cmd items for independent steps, or write a script under scripts/ instead.
 
 version: '3'
 
@@ -9,6 +10,9 @@ tasks:
       - task: test
       - task: build
       - task: list
+  check:
+    deps:
+      - task: default
   install:
     cmds:
       - go install -ldflags "-X main.commit=$(git rev-parse HEAD)"
@@ -37,7 +41,6 @@ tasks:
       - go test ./...
   fmt:
     cmds:
-      - typos . .github .vscode --write-changes
       - dprint fmt
       - go fmt ./...
   lint:
@@ -46,6 +49,5 @@ tasks:
       - dprint check
       - go vet ./...
       - goreleaser check
-      - typos . .github .vscode
+      - typos . .github
       - zizmor .
-      - dprint check

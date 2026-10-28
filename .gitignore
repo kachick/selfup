@@ -28,4 +28,5 @@ dist/
 
 # Nix
 .direnv/
+.vscode/
 result

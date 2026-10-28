@@ -4,23 +4,7 @@ on:
     tags:
       - 'v*'
     branches: [main]
-    paths:
-      - '.github/actions/setup-nix/**'
-      - '.github/workflows/ci-nix.yml'
-      - '*.nix'
-      - 'flake.*'
-      - 'go.mod'
-      - 'Taskfile.yml'
-      - 'examples/**'
   pull_request:
-    paths:
-      - '.github/actions/setup-nix/**'
-      - '.github/workflows/ci-nix.yml'
-      - '*.nix'
-      - 'flake.*'
-      - 'go.mod'
-      - 'Taskfile.yml'
-      - 'examples/**'
   schedule:
     # Every 10:42 JST
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
@@ -41,8 +25,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tasks:
+    name: Tasks
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     if: ${{ !inputs['target-tag'] }}
@@ -58,6 +47,7 @@ jobs:
       - run: nix develop --command task
 
   package:
+    name: Package
     strategy:
       fail-fast: false
       matrix:
