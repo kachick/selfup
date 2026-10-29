@@ -1,7 +1,7 @@
 name: 🔄 Sync Nix vendorHash
 # Why schedule sweep instead of pull_request or workflow_run:
-# - pull_request triggered by Dependabot cannot access repository secrets
-#   (SAMU_APP_PRIVATE_KEY) to generate a GitHub App token without Dependabot secrets.
+# - pull_request triggered by bots (Dependabot, Renovate) cannot access repository
+#   secrets (SAMU_APP_PRIVATE_KEY) to generate a GitHub App token without bot secrets.
 # - workflow_run executes with access to repository secrets, but is flagged as
 #   fundamentally insecure (dangerous-triggers) by zizmor and introduces supply
 #   chain risks when checking out untrusted PR branches.
@@ -41,20 +41,19 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync vendorHash for open Dependabot PRs
+      - name: Sync vendorHash for open bot PRs
         env:
           GH_TOKEN: ${{ steps.publish-token.outputs.token }}
         run: |
           set -euo pipefail
 
           branches=$(gh pr list \
-            --author "app/dependabot" \
             --state open \
-            --json headRefName \
-            --jq '.[] | select(.headRefName | startswith("dependabot/go_modules/")) | .headRefName')
+            --json headRefName,author,files \
+            --jq '.[] | select((.author.login == "app/dependabot" or .author.login == "app/renovate") and (.files | any(.path == "go.mod" or .path == "go.sum"))) | .headRefName')
 
           if [ -z "${branches}" ]; then
-            echo "No open Dependabot Go PRs found"
+            echo "No open bot Go PRs found"
             exit 0
           fi
 
