@@ -158,7 +158,7 @@ In your workflow:
 - run: nix run .#update-deps
 ```
 
-See [bump-flake-lock-and-selfup.yml](./.github/workflows/bump-flake-lock-and-selfup.yml) for a complete workflow example.
+See [bump-flake-lock.yml](./.github/workflows/bump-flake-lock.yml) for a complete workflow example.
 
 ## FAQ
 

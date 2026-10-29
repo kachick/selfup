@@ -15,5 +15,7 @@ jobs:
     uses: kachick/workflows/.github/workflows/reusable-bump-flake-lock.yml@main # zizmor: ignore[unpinned-uses]
     with:
       app-id: ${{ vars.SAMU_APP_ID }}
+      post-commit-lock-file: nix run .#update-deps
+      post-commit-lock-file-title: 'Sync CI dependencies with nixpkgs'
     secrets:
       APP_PRIVATE_KEY: ${{ secrets.SAMU_APP_PRIVATE_KEY }}

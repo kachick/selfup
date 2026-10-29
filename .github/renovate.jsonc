@@ -3,5 +3,15 @@
   "extends": [
     "github>kachick/renovate-config//presets/default.jsonc",
     "github>kachick/renovate-config//presets/gomod.jsonc"
+  ],
+  "packageRules": [
+    // Managed by selfup; do not let Renovate create conflicting PRs
+    {
+      "description": "Disable goreleaser updates as it is managed by selfup",
+      "matchPackageNames": [
+        "goreleaser/goreleaser"
+      ],
+      "enabled": false
+    }
   ]
 }
